@@ -9,10 +9,12 @@ metadata:
 
 ## Harness role
 
-This skill is a **guide (feedforward control)** in the **behaviour + maintainability** harness, in the sense used by Birgitta Böckeler in [*Harness Engineering*](https://martinfowler.com/articles/harness-engineering.html). It runs **pre-implementation**.
-
-- **Computational checks it declares (the "gate"):** every signed-off FD must list, in its `## Computational gate` block, the deterministic checks that will gate the implementation — at minimum tests, type checks, lint; plus any perf budget, bundle ceiling, or accessibility budget the work touches. Keep quality left: if a check is cheap and deterministic, name it before generation starts.
-- **Inferential checks it performs:** structured in-file Q&A on design, scope, and risk, with a recommendation per question and a notes slot.
+- **Control type:** guide (feedforward)
+- **Regulation category:** behaviour + maintainability
+- **Lifecycle stage:** pre-implementation
+- **Computational checks:** the FD declares the gate in its `## Computational gate` block — tests, type checks, lint at minimum, plus any perf budget, bundle ceiling, or accessibility budget the work touches. Keep quality left: name the cheap deterministic checks before generation starts
+- **Inferential checks:** structured in-file Q&A on design, scope, and risk, with a recommendation per question and a notes slot
+- **Frame:** [*Harness Engineering*](https://martinfowler.com/articles/harness-engineering.html) by Birgitta Böckeler
 
 This skill runs a tight, in-file question-and-answer loop that refines a plan document (an "FD" — feature design / fix
 design) until the user has signed it off. No implementation code is written while this skill is running. The goal is to

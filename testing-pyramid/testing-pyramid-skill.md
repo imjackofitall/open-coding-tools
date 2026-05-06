@@ -9,10 +9,12 @@ metadata:
 
 ## Harness role
 
-This skill is a **guide (feedforward control)** in the **behaviour** harness, in the sense used by Birgitta Böckeler in [*Harness Engineering*](https://martinfowler.com/articles/harness-engineering.html). It runs **pre-implementation** (Mode A — Plan) and **post-implementation / on cadence** (Mode B — Audit).
-
-- **Computational checks it produces:** the test plan itself becomes part of the deterministic gate — every behaviour in the surface-area table is a test that runs in the relevant CI tier.
-- **Inferential checks it performs:** layer-fit judgement, bloat detection, gap detection, layer-pick decisions (Mode C).
+- **Control type:** guide (feedforward)
+- **Regulation category:** behaviour
+- **Lifecycle stage:** pre-implementation (Mode A — Plan) and post-implementation / on cadence (Mode B — Audit)
+- **Computational checks:** the test plan itself becomes part of the deterministic gate — every behaviour in the surface-area table is a test that runs in the relevant CI tier
+- **Inferential checks:** layer-fit judgement, bloat detection, gap detection, layer-pick decisions (Mode C)
+- **Frame:** [*Harness Engineering*](https://martinfowler.com/articles/harness-engineering.html) by Birgitta Böckeler
 
 This skill plans or audits a project's test coverage using the testing pyramid as the rubric. It does NOT write tests — it produces a coverage map, identifies gaps and bloat, and outputs a prioritised edit list. Implementation is a separate task.
 

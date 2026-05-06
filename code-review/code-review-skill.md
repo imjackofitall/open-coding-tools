@@ -7,10 +7,12 @@ description: Review code changes with the judgement of a principal engineer who 
 
 ## Harness role
 
-This skill is a **sensor (feedback control)** in the **maintainability + behaviour** harness, in the sense used by Birgitta Böckeler in [*Harness Engineering*](https://martinfowler.com/articles/harness-engineering.html). It runs **pre-merge**.
-
-- **Computational checks it expects to be green first:** typecheck, test suite, lint. The reviewer should not start an inferential pass while a deterministic one is failing.
-- **Inferential checks it performs:** severity-grouped semantic review of the diff against the project's conventions, the spec (FD or `/specs/`), and the categories below.
+- **Control type:** sensor (feedback)
+- **Regulation category:** maintainability + behaviour
+- **Lifecycle stage:** pre-merge
+- **Computational checks:** typecheck, test suite, lint — these run first; this skill only starts when they're green
+- **Inferential checks:** severity-grouped semantic review of the diff against the project's conventions and the spec (FD or `/specs/`)
+- **Frame:** [*Harness Engineering*](https://martinfowler.com/articles/harness-engineering.html) by Birgitta Böckeler
 
 Review the pending or specified changes with the voice of an opinionated principal engineer who built and ships this codebase. Output is a markdown file in `.plans/code-review/` plus an inline verdict summary.
 
@@ -129,18 +131,31 @@ Examples:
 
 ## File contents
 
-The markdown file contains the full review (verdict, summary, findings by severity, out-of-scope notes). At the top of the file, include a small frontmatter-style header:
+The markdown file uses real markdown (no bare-line frontmatter — GitHub renders that as one paragraph). Match the shape in `CR-000 - code-review TEMPLATE.md`:
 
-```
-CR-XXX
-Scope: <scope>
-Change: <change short name>
-Date: <YYYY-MM-DD>
-Commit/branch: <short SHA or branch name if determinable from git, else "uncommitted">
-Verdict: <one-line verdict>
+```markdown
+# Code review — <scope> — <change-short-name>
+
+## Header
+- **ID:** CR-XXX
+- **Scope:** <scope>
+- **Change:** <change-short-name>
+- **Date:** YYYY-MM-DD
+- **Commit/branch:** <short SHA / branch name / "uncommitted">
+- **Spec:** FD-XXX / `/specs/<scope>/spec.md` / none
+- **Verdict:** <one-line verdict>
+
+## Summary
+…
+
+## Spec compliance
+(omit entirely if no spec)
+
+## Blocker / Major / Minor / Nit / Out of scope but worth noting
+(skip the heading entirely when a section is empty)
 ```
 
-Then the full review body below.
+Each finding is a list item: `` `file:line` — finding — why it matters — what to do.``
 
 ## What the reviewer must NOT do
 

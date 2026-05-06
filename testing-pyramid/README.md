@@ -2,7 +2,12 @@
 
 A planning and audit workflow for deciding what to test, where to test it, and which tests are not pulling their weight.
 
-**Harness role:** guide (feedforward) in the behaviour harness, run pre and post-implementation. See the [harness frame](../readme.md#the-harness-frame) for vocabulary. The plan it produces becomes part of the project's computational gate; the layer-fit and bloat judgements are the inferential half.
+## Harness role
+
+- **Control type:** guide (feedforward)
+- **Regulation category:** behaviour
+- **Lifecycle stage:** pre-implementation + post-implementation / on cadence
+- See the [harness frame](../readme.md#the-harness-frame) for vocabulary. The plan it produces becomes part of the project's computational gate; the layer-fit and bloat judgements are the inferential half.
 
 ## Files
 

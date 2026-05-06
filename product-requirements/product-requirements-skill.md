@@ -9,10 +9,12 @@ metadata:
 
 ## Harness role
 
-This skill is a **guide (feedforward control)** in the **behaviour** harness, in the sense used by Birgitta Böckeler in [*Harness Engineering*](https://martinfowler.com/articles/harness-engineering.html). It runs **pre-design**.
-
-- **Computational checks it triggers:** none. PRDs are upstream of code; the deterministic gate is declared later, by the FDs that descend from this PRD.
-- **Inferential checks it performs:** structured in-file Q&A on users, scope, data model, UX, and phasing — every question with concrete options and a recommendation.
+- **Control type:** guide (feedforward)
+- **Regulation category:** behaviour
+- **Lifecycle stage:** pre-design
+- **Computational checks:** none — PRDs are upstream of code; the deterministic gate is declared later by the FDs that descend from this PRD
+- **Inferential checks:** structured in-file Q&A on users, scope, data model, UX, and phasing — every question with concrete options and a recommendation
+- **Frame:** [*Harness Engineering*](https://martinfowler.com/articles/harness-engineering.html) by Birgitta Böckeler
 
 This skill runs a tight, in-file question-and-answer loop that builds and refines a Product Requirements Document (PRD)
 until the user has signed it off. No code is written while this skill is running. The goal is a spec where every product

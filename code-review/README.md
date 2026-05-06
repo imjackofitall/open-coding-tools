@@ -2,7 +2,12 @@
 
 A principal-engineer style review workflow for PRs, branches, staged changes, unstaged changes, and pasted diffs.
 
-**Harness role:** sensor (feedback) in the maintainability + behaviour harness, run pre-merge. See the [harness frame](../readme.md#the-harness-frame) for vocabulary. Computational checks (typecheck, test, lint) run first; this skill is the inferential pass over the diff.
+## Harness role
+
+- **Control type:** sensor (feedback)
+- **Regulation category:** maintainability + behaviour
+- **Lifecycle stage:** pre-merge
+- See the [harness frame](../readme.md#the-harness-frame) for vocabulary. Computational checks (typecheck, test, lint) run first; this skill is the inferential pass over the diff.
 
 ## Files
 

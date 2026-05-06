@@ -27,7 +27,7 @@ The point of using Böckeler's vocabulary is to stop pretending these artefacts 
 |------------------------------------------------------------|--------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------|
 | [Architecture Fitness](architecture-fitness/README.md)     | You want fitness functions for perf, layering, a11y, or other characteristics. | `architecture-fitness/architecture-fitness-skill.md`, `architecture-fitness/AF-000 - architecture-fitness TEMPLATE.md` |
 | [Code Review](code-review/README.md)                       | You want a sharp PR, diff, or branch review before merging.              | `code-review/code-review-skill.md`, `code-review/CR-000 - code-review TEMPLATE.md`                                      |
-| [Dependency Audit](dependency-audit/)                      | You want to find vulnerabilities or trim unused npm dependencies.        | `dependency-audit/dependency-audit-skill.md`                                                                            |
+| [Dependency Audit](dependency-audit/README.md)             | You want to find vulnerabilities or trim unused npm dependencies.        | `dependency-audit/dependency-audit-skill.md`, `dependency-audit/DA-000 - dependency-audit TEMPLATE.md`                  |
 | [Feature Development](feature-development/README.md)       | You need to plan a specific feature or fix before code starts.           | `feature-development/feature-development-skill.md`, `feature-development/FD-000 - feature-development TEMPLATE.md`      |
 | [Product Requirements](product-requirements/README.md)     | You want to turn a product idea into a complete PRD.                     | `product-requirements/product-requirements-skill.md`, `product-requirements/PRD-000 - product-requirements TEMPLATE.md` |
 | [Testing Pyramid](testing-pyramid/README.md)               | You need to plan or audit test coverage at the right layer.              | `testing-pyramid/testing-pyramid-skill.md`, `testing-pyramid/TP-000 - testing-pyramid TEMPLATE.md`                      |
@@ -46,6 +46,8 @@ open-coding-tools/
     EXAMPLE - code-review.md
   dependency-audit/
     dependency-audit-skill.md
+    DA-000 - dependency-audit TEMPLATE.md
+    EXAMPLE - dependency-audit.md
   feature-development/
     feature-development-skill.md
     FD-000 - feature-development TEMPLATE.md

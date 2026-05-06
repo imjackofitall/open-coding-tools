@@ -7,9 +7,16 @@ metadata:
 
 # Architecture Fitness
 
-This skill names a project's architectural characteristics and turns each one into a **fitness function** — a deterministic, automated check that fails the build when the characteristic regresses. It produces a single markdown spec at `.plans/architecture-fitness/AF-XXX - <scope> - <characteristic-or-audit>.md` (numbered sequentially — find the highest existing `AF-NNN` and increment, start at AF-001 if the folder is empty).
+## Harness role
 
-The skill follows Birgitta Böckeler's *Harness Engineering* framing: fitness functions are how the **architecture-fitness harness** is implemented — computational checks that run pre-commit, in CI, or continuously, with thresholds the team is willing to fail a build over.
+- **Control type:** guide (feedforward) + sensor (feedback)
+- **Regulation category:** architecture fitness
+- **Lifecycle stage:** pre-implementation + continuous
+- **Computational checks:** the fitness functions this skill plans — perf budgets (Lighthouse, custom probes), bundle ceilings (`size-limit`), layering rules (ESLint `no-restricted-imports`, dependency-cruiser), accessibility budgets (axe-core), error-budget SLOs (Prom alerts). Each one runs pre-commit, in CI, or continuously
+- **Inferential checks:** characteristic selection, threshold-setting, ownership, and enforcement-state judgement (enforced / gap / accepted gap / out of scope)
+- **Frame:** [*Harness Engineering*](https://martinfowler.com/articles/harness-engineering.html) by Birgitta Böckeler
+
+This skill names a project's architectural characteristics and turns each one into a **fitness function** — a deterministic, automated check that fails the build when the characteristic regresses. It produces a single markdown spec at `.plans/architecture-fitness/AF-XXX - <scope> - <characteristic-or-audit>.md` (numbered sequentially — find the highest existing `AF-NNN` and increment, start at AF-001 if the folder is empty).
 
 ## When to use
 

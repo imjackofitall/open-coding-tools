@@ -2,7 +2,12 @@
 
 A workflow for naming a project's architectural characteristics and turning each one into a **fitness function** — a deterministic, repeatable check that fails when the characteristic regresses.
 
-**Harness role:** guide (feedforward) + sensor (feedback) in the architecture-fitness harness. See the [harness frame](../readme.md#the-harness-frame) for vocabulary. The fitness functions this skill plans are computational checks — perf budgets, bundle ceilings, layering rules, accessibility budgets, error-budget SLOs — wired in pre-commit, in CI, or as continuous synthetic checks. The decision about *which* characteristic matters and *what* the threshold should be is the inferential half.
+## Harness role
+
+- **Control type:** guide (feedforward) + sensor (feedback)
+- **Regulation category:** architecture fitness
+- **Lifecycle stage:** pre-implementation + continuous
+- See the [harness frame](../readme.md#the-harness-frame) for vocabulary. The fitness functions this skill plans are computational checks (perf budgets, bundle ceilings, layering rules, accessibility budgets, error-budget SLOs) wired in pre-commit, in CI, or as continuous synthetic checks. Choosing *which* characteristic matters and *what* the threshold should be is the inferential half.
 
 ## Files
 

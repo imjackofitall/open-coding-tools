@@ -9,10 +9,12 @@ metadata:
 
 ## Harness role
 
-This skill is a **sensor (feedback control)** in the **maintainability** harness, in the sense used by Birgitta Böckeler in [*Harness Engineering*](https://martinfowler.com/articles/harness-engineering.html). It runs **on cadence** (and pre-release when a release is dependency-sensitive).
-
-- **Computational checks it triggers:** `npm audit --json`, `npm audit fix` (no-force), `npm view <pkg> dist.unpackedSize`, lockfile diff, codebase greps for actual call sites.
-- **Inferential checks it performs:** necessity / native-replacement triage, migration-cost judgement, classification of every dep into KEEP / REPLACE / REMOVE / CONSOLIDATE.
+- **Control type:** sensor (feedback)
+- **Regulation category:** maintainability
+- **Lifecycle stage:** on cadence (and pre-release when a release is dependency-sensitive)
+- **Computational checks:** `npm audit --json`, `npm audit fix` (no-force), `npm view <pkg> dist.unpackedSize`, lockfile diff, codebase greps for actual call sites
+- **Inferential checks:** necessity / native-replacement triage, migration-cost judgement, classification of every dep into KEEP / REPLACE / REMOVE / CONSOLIDATE
+- **Frame:** [*Harness Engineering*](https://martinfowler.com/articles/harness-engineering.html) by Birgitta Böckeler
 
 This skill audits one project's npm dependencies — security first, necessity second — and produces a single markdown report. It does NOT speculatively upgrade, install, or refactor source code. Phase 1 must finish before Phase 2 starts.
 

@@ -2,7 +2,12 @@
 
 A PRD workflow for turning a rough product idea into a complete product specification that can guide the whole build.
 
-**Harness role:** guide (feedforward) in the behaviour harness, run pre-design — the leftmost control in the lifecycle. See the [harness frame](../readme.md#the-harness-frame) for vocabulary. The deterministic gate is declared later by FDs; this skill is purely inferential.
+## Harness role
+
+- **Control type:** guide (feedforward)
+- **Regulation category:** behaviour
+- **Lifecycle stage:** pre-design — the leftmost control in the lifecycle
+- See the [harness frame](../readme.md#the-harness-frame) for vocabulary. The deterministic gate is declared later by FDs; this skill is purely inferential.
 
 ## Files
 

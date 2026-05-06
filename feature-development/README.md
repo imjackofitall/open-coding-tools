@@ -2,7 +2,12 @@
 
 A planning workflow for turning a feature or fix into a signed-off implementation design before code is written.
 
-**Harness role:** guide (feedforward) in the behaviour + maintainability harness, run pre-implementation. See the [harness frame](../readme.md#the-harness-frame) for vocabulary. The FD declares the computational gate (tests, types, lint, perf budget) so cheap checks land as far left as they fit; the in-file Q&A is the inferential half.
+## Harness role
+
+- **Control type:** guide (feedforward)
+- **Regulation category:** behaviour + maintainability
+- **Lifecycle stage:** pre-implementation
+- See the [harness frame](../readme.md#the-harness-frame) for vocabulary. The FD declares the computational gate (tests, types, lint, perf budget) so cheap checks land as far left as they fit; the in-file Q&A is the inferential half.
 
 ## Files
 
