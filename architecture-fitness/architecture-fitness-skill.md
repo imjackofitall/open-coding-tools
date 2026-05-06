@@ -16,7 +16,7 @@ metadata:
 - **Inferential checks:** characteristic selection, threshold-setting, ownership, and enforcement-state judgement (enforced / gap / accepted gap / out of scope)
 - **Frame:** [*Harness Engineering*](https://martinfowler.com/articles/harness-engineering.html) by Birgitta Böckeler
 
-This skill names a project's architectural characteristics and turns each one into a **fitness function** — a deterministic, automated check that fails the build when the characteristic regresses. It produces a single markdown spec at `.plans/architecture-fitness/AF-XXX - <scope> - <characteristic-or-audit>.md` (numbered sequentially — find the highest existing `AF-NNN` and increment, start at AF-001 if the folder is empty).
+This skill names a project's architectural characteristics and turns each one into a **fitness function** — a deterministic, automated check that fails the build when the characteristic regresses. It produces a single Markdown spec at `.plans/architecture-fitness/AF-XXX - <scope> - <characteristic-or-audit>.md` (numbered sequentially — find the highest existing `AF-NNN` and increment, start at AF-001 if the folder is empty).
 
 ## When to use
 
@@ -56,26 +56,31 @@ Date: <YYYY-MM-DD>
 Status: <open | in progress | live>
 
 ## Overview
-One paragraph: what this scope is, what kind of system it is (UI / API / batch / data), and which characteristics matter most for it.
+
+One paragraph: what this scope is, what kind of system it is (UI / API / batch / data), and which characteristics matter
+most for it.
 
 ## Characteristics
 
-| ID  | Characteristic       | Why it matters              | Threshold                | Fitness function                                        | Where it runs           | Enforcement state                  | Owner |
-|-----|----------------------|-----------------------------|--------------------------|---------------------------------------------------------|--------------------------|------------------------------------|-------|
-| AF1 | LCP on /booking      | Conversion drops past 2.5s  | LCP ≤ 2.5s p75 (mobile)  | Lighthouse CI assertion in `lighthouserc.json`          | CI (per PR) + nightly synthetic | enforced ✓ / gap / missing | Web   |
-| AF2 | Route JS bundle      | First-load cost on mobile   | ≤ 180KB gzipped per route | `next build` + size-limit config                        | pre-commit + CI          | …                                  | Web   |
-| AF3 | Layering             | UI must not import server-only modules | zero violations | ESLint `no-restricted-imports` boundaries config        | pre-commit + CI          | …                                  | Web   |
-| AF4 | a11y on /booking     | Legal + ethical floor       | axe: 0 serious, 0 critical | Playwright + axe-core in e2e suite                    | CI                       | …                                  | Web   |
-| AF5 | API error budget     | Reliability SLO             | ≤ 0.1% 5xx over 7d rolling | Prom alert on the SLO recording rule                  | continuous (Prometheus)  | …                                  | API   |
+| ID  | Characteristic   | Why it matters                         | Threshold                  | Fitness function                                 | Where it runs                   | Enforcement state          | Owner |
+|-----|------------------|----------------------------------------|----------------------------|--------------------------------------------------|---------------------------------|----------------------------|-------|
+| AF1 | LCP on /booking  | Conversion drops past 2.5s             | LCP ≤ 2.5s p75 (mobile)    | Lighthouse CI assertion in `lighthouserc.json`   | CI (per PR) + nightly synthetic | enforced ✓ / gap / missing | Web   |
+| AF2 | Route JS bundle  | First-load cost on mobile              | ≤ 180KB gzipped per route  | `next build` + size-limit config                 | pre-commit + CI                 | …                          | Web   |
+| AF3 | Layering         | UI must not import server-only modules | zero violations            | ESLint `no-restricted-imports` boundaries config | pre-commit + CI                 | …                          | Web   |
+| AF4 | a11y on /booking | Legal + ethical floor                  | axe: 0 serious, 0 critical | Playwright + axe-core in e2e suite               | CI                              | …                          | Web   |
+| AF5 | API error budget | Reliability SLO                        | ≤ 0.1% 5xx over 7d rolling | Prom alert on the SLO recording rule             | continuous (Prometheus)         | …                          | API   |
 
 ## Open questions
+
 {checkbox blocks using the in-file question format below — only live, unresolved questions}
 
 ## Decisions
+
 | ✅   | Question | Decision | Why |
 |-----|----------|----------|-----|
 
 ## Out of scope
+
 {bullets — characteristics deliberately not addressed this round, with one-line reason}
 ```
 
@@ -102,7 +107,7 @@ A row in the table is only a fitness function if all of these are true:
 1. **Deterministic.** Same input, same answer. "Looks fast" doesn't count; a number from Lighthouse does.
 2. **Automated.** Runs without a human pressing go. A doc that says "remember to run X" is not a fitness function.
 3. **Threshold is a number.** "Reasonable" is not a threshold. Pick a number; you can always change it.
-4. **Failure has consequences.** Either it fails CI, or it pages someone, or it blocks a deploy. A check whose failure is ignored is theatre — call it that and remove it.
+4. **Failure has consequences.** Either it fails CI, or it pages someone, or it blocks a deployment. A check whose failure is ignored is theatre — call it that and remove it.
 5. **Cheap to run where it lives.** Pre-commit fitness functions must finish in seconds. CI ones can take minutes. Continuous ones run on a schedule, not a PR.
 
 If a candidate fails any of those, either reshape it until it passes or move it to "Out of scope" with a one-line reason.
@@ -132,7 +137,7 @@ Cap one round at ~3 questions. Skip anything derivable from the codebase or exis
 1. **Threshold strictness.** Set the bar at current production p75 ("don't regress"), or at the target we want ("force improvement")? Default: don't regress; set a separate stretch target with a reminder to revisit.
 2. **Failure mode.** Hard-fail CI, soft-warn-only for one sprint, or warn-then-fail after N days? Default: warn first, then fail after the team has had a sprint to clear existing violations.
 3. **Where to run.** Pre-commit (cheap, friction), CI per PR (medium), or nightly only (cheapest, slowest signal)? Default: per PR for fast checks, nightly for synthetic / external probes.
-4. **Owner.** Single team, rotating oncall, or a platform team? Default: the team whose code most often changes the relevant surface.
+4. **Owner.** Single team, rotating on-call, or a platform team? Default: the team whose code most often changes the relevant surface.
 
 ## Iteration loop
 
