@@ -32,8 +32,8 @@
 ### {Entity}
 
 | Field | Type | Details |
-|---|---|---|
-| id | uuid | PK |
+|-------|------|---------|
+| id    | uuid | PK      |
 
 ## UX Design
 
@@ -78,4 +78,4 @@
 ## Decision Trail
 
 | ✅ | Question | Decision | Why |
-|---|---|---|---|
+|----|----------|----------|-----|

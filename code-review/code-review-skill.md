@@ -5,6 +5,13 @@ description: Review code changes with the judgement of a principal engineer who 
 
 # Principal Code Review
 
+## Harness role
+
+This skill is a **sensor (feedback control)** in the **maintainability + behaviour** harness, in the sense used by Birgitta Böckeler in [*Harness Engineering*](https://martinfowler.com/articles/harness-engineering.html). It runs **pre-merge**.
+
+- **Computational checks it expects to be green first:** typecheck, test suite, lint. The reviewer should not start an inferential pass while a deterministic one is failing.
+- **Inferential checks it performs:** severity-grouped semantic review of the diff against the project's conventions, the spec (FD or `/specs/`), and the categories below.
+
 Review the pending or specified changes with the voice of an opinionated principal engineer who built and ships this codebase. Output is a markdown file in `.plans/code-review/` plus an inline verdict summary.
 
 ## When to trigger
@@ -143,6 +150,14 @@ Then the full review body below.
 - Don't list every minor inconsistency — pick the ones that matter.
 - Don't recommend tests unless the change actually warrants them (a token swap doesn't need tests; a new API route does).
 - Don't suggest extracting shared packages or restructuring the project layout unless the user asked for it.
+- **Defer to smaller models for routine reads.** When you need to read a known file,
+  grep for a specific symbol, or fetch a single doc page, do it directly with `Read` /
+  `Grep` / `WebFetch`. But anything that fans out — exploring an unfamiliar subsystem,
+  finding all call-sites of a symbol, summarising a long doc, comparing multiple files —
+  should be delegated to a subagent with `model: "haiku"` (or `"sonnet"` if the task
+  needs reasoning). Reserve the top-level Opus session for the synthesis work that
+  actually needs it: judging severity, weighing tradeoffs, writing the final review.
+  Don't pay Opus rates for grep.
 
 ## Output format
 

@@ -71,44 +71,44 @@ behind the magic-link sign-in.
 
 ### user
 
-| Field | Type | Details |
-|---|---|---|
-| id | uuid | PK |
-| email | text | unique, lowercased |
-| created_at | timestamptz | |
+| Field      | Type        | Details            |
+|------------|-------------|--------------------|
+| id         | uuid        | PK                 |
+| email      | text        | unique, lowercased |
+| created_at | timestamptz |                    |
 
 ### article
 
-| Field | Type | Details |
-|---|---|---|
-| id | uuid | PK |
-| user_id | uuid | FK → user.id |
-| url | text | unique per user |
-| title | text | |
-| excerpt | text | |
-| reading_time_minutes | int | nullable |
-| lead_image_url | text | nullable |
-| status | enum | `inbox` \| `archived` |
-| starred | bool | default false |
-| created_at | timestamptz | |
-| read_at | timestamptz | nullable |
+| Field                | Type        | Details                  |
+|----------------------|-------------|--------------------------|
+| id                   | uuid        | PK                       |
+| user_id              | uuid        | FK → user.id             |
+| url                  | text        | unique per user          |
+| title                | text        |                          |
+| excerpt              | text        |                          |
+| reading_time_minutes | int         | nullable                 |
+| lead_image_url       | text        | nullable                 |
+| status               | enum        | `inbox` \| `archived`   |
+| starred              | bool        | default false            |
+| created_at           | timestamptz |                          |
+| read_at              | timestamptz | nullable                 |
 
 ### tag
 
-| Field | Type | Details |
-|---|---|---|
-| id | uuid | PK |
-| user_id | uuid | FK → user.id |
-| name | text | unique per user |
-| colour | enum | `slate` \| `red` \| `amber` \| `green` \| `blue` \| `violet` |
+| Field   | Type | Details                                                      |
+|---------|------|--------------------------------------------------------------|
+| id      | uuid | PK                                                           |
+| user_id | uuid | FK → user.id                                                 |
+| name    | text | unique per user                                              |
+| colour  | enum | `slate` \| `red` \| `amber` \| `green` \| `blue` \| `violet` |
 
 ### article_tags
 
-| Field | Type | Details |
-|---|---|---|
+| Field      | Type | Details                            |
+|------------|------|------------------------------------|
 | article_id | uuid | FK → article.id, on delete cascade |
-| tag_id | uuid | FK → tag.id, on delete cascade |
-| | | PK is (article_id, tag_id) |
+| tag_id     | uuid | FK → tag.id, on delete cascade     |
+|            |      | PK is (article_id, tag_id)         |
 
 ## UX Design
 
@@ -182,10 +182,10 @@ _All resolved._
 
 ## Decision Trail
 
-| ✅ | Question | Decision | Why |
-|---|---|---|---|
-| ✅ | Q1. Auth method? | Magic link only | Removes password reset flows; the user base is single-user-per-account so OAuth provides no team benefit |
-| ✅ | Q2. Extraction in-house or third-party? | Third-party service | Article extraction is a deep problem; not worth building in MVP |
-| ✅ | Q3. Tag colours custom or fixed palette? | Fixed 6-colour palette | Custom colour picker is UX cost we don't need; six is enough to differentiate |
-| ✅ | Q4. Multi-tag filter semantics? | OR | Matches user expectation; AND can ship later if asked for |
-| ✅ | Q5. Sharing / collaboration? | Out of scope for MVP | Keeps the schema and the UI simple; revisit after the product has users |
+| ✅ | Question                                 | Decision               | Why                                                                                                      |
+|----|------------------------------------------|------------------------|----------------------------------------------------------------------------------------------------------|
+| ✅ | Q1. Auth method?                         | Magic link only        | Removes password reset flows; the user base is single-user-per-account so OAuth provides no team benefit |
+| ✅ | Q2. Extraction in-house or third-party?  | Third-party service    | Article extraction is a deep problem; not worth building in MVP                                          |
+| ✅ | Q3. Tag colours custom or fixed palette? | Fixed 6-colour palette | Custom colour picker is UX cost we don't need; six is enough to differentiate                            |
+| ✅ | Q4. Multi-tag filter semantics?          | OR                     | Matches user expectation; AND can ship later if asked for                                                |
+| ✅ | Q5. Sharing / collaboration?             | Out of scope for MVP   | Keeps the schema and the UI simple; revisit after the product has users                                  |

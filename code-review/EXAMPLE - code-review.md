@@ -14,13 +14,13 @@ wrong fallback when the tag list fails to load.
 
 Spec Compliance
 
-| Scenario | Status | Notes |
-|---|---|---|
-| Filter narrows results by tag | ✅ | |
-| Multi-tag filter uses OR semantics | ✅ | |
-| Filter persists across reload | ✅ | URL params wired correctly |
-| Tag-load failure is visible | ❌ | Falls through to empty-state copy — see Major below |
-| Clearing the filter restores full inbox | — | Not yet implemented (Phase 2 item) |
+| Scenario                                | Status | Notes                                               |
+|-----------------------------------------|--------|-----------------------------------------------------|
+| Filter narrows results by tag           | ✅     |                                                     |
+| Multi-tag filter uses OR semantics      | ✅     |                                                     |
+| Filter persists across reload           | ✅     | URL params wired correctly                          |
+| Tag-load failure is visible             | ❌     | Falls through to empty-state copy — see Major below |
+| Clearing the filter restores full inbox | —      | Not yet implemented (Phase 2 item)                  |
 
 Major
 

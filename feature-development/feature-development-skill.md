@@ -7,10 +7,22 @@ metadata:
 
 # FD Plan Iteration
 
+## Harness role
+
+This skill is a **guide (feedforward control)** in the **behaviour + maintainability** harness, in the sense used by Birgitta Böckeler in [*Harness Engineering*](https://martinfowler.com/articles/harness-engineering.html). It runs **pre-implementation**.
+
+- **Computational checks it declares (the "gate"):** every signed-off FD must list, in its `## Computational gate` block, the deterministic checks that will gate the implementation — at minimum tests, type checks, lint; plus any perf budget, bundle ceiling, or accessibility budget the work touches. Keep quality left: if a check is cheap and deterministic, name it before generation starts.
+- **Inferential checks it performs:** structured in-file Q&A on design, scope, and risk, with a recommendation per question and a notes slot.
+
 This skill runs a tight, in-file question-and-answer loop that refines a plan document (an "FD" — feature design / fix
-design) until the user has signed it off. No code is written while this skill is running. The goal is to reach a spec
-where every decision is explicit, every open question is closed, and every user correction has been folded back into the
-relevant section(s) of the document — not just recorded as an answer.
+design) until the user has signed it off. No implementation code is written while this skill is running. The goal is to
+reach a spec where every decision is explicit, every open question is closed, and every user correction has been folded
+back into the relevant section(s) of the document — not just recorded as an answer.
+
+The FD is also a **living record**, not just a planning artefact. Once implementation begins (in a separate task), the
+FD continues to evolve: each phase that ships gets an Implementation Notes block appended, capturing what actually
+changed, deviations from the plan, and follow-ups. See "Phases and the implementation template" below — that template
+applies during implementation, not during planning, but the FD's structure must accommodate it from day one.
 
 ## When to use
 
@@ -65,8 +77,10 @@ If the user has answered questions since last time:
 
 ### Beat 2b — Populate Acceptance Criteria
 
-After processing user answers, update the `## Acceptance Criteria` section. Each scenario block uses Given-When-Then
-format and covers one observable behaviour:
+After processing user answers, update acceptance criteria. **Placement depends on FD shape:** flat FDs use a top-level
+`## Acceptance Criteria` section; phased FDs put criteria inside each `### Phase N` block (under `#### Acceptance
+criteria`) so each phase reads as a self-contained slice. Same Given-When-Then format either way. Each scenario block
+uses:
 
 ```markdown
 #### Scenario: {scenario name}
@@ -150,8 +164,12 @@ Once the spec is fleshed out enough that you're naming specific files, libraries
 responsible for surfacing risks and new issues the chosen approach would introduce. These are not questions — they are
 footguns you discovered during investigation that the user should see before implementation starts.
 
-Surface them as a `## Risks & new issues surfaced by this investigation` section with a **table**, not a list of prose
-paragraphs. Columns:
+**Placement depends on FD shape.** Flat FDs put a single `## Risks & new issues surfaced by this investigation` section
+near the bottom. Phased FDs put a `#### Risks & verification` block inside each `### Phase N` so risks travel with the
+phase they apply to. Same table format either way; IDs stay unique across the whole FD (Phase 2's first risk continues
+the numbering from Phase 1's last).
+
+Surface as a **table**, not a list of prose paragraphs. Columns:
 
 | ID | Risk | Mitigation | Verification |
 |----|------|------------|--------------|
@@ -190,6 +208,194 @@ Watch for risks in these categories:
 - **Performance cliffs under cold cache / rate limits**.
 - **Backward compatibility with saved user state** (password managers, sessionStorage, URL params).
 
+## Phases and the implementation template
+
+Most FDs deliver a single feature in one go. Some span multiple visible-to-the-user phases (e.g. ship Phase 1 minimal,
+review, then ship Phase 2 logos). When an FD has phases, surface them as the dominant structure of the document — a
+top-level `## Phases` section with each phase as a `###` heading.
+
+### When to use phases
+
+Add a `## Phases` section if any of the following is true:
+
+- The user asks for "phased" delivery, "ship X first, then Y", or "let me see X before we do Y".
+- A decision question's answer is "do X now, defer Y" (Q1's resolution, etc.).
+- The work crosses a natural review boundary (a render the user wants to eyeball before more code lands).
+- Total scope is large enough that landing it in one PR is risky.
+
+If none of these apply, keep the FD flat — no `## Phases` section, no per-phase blocks. Don't manufacture phases for
+ceremony. A flat FD with `## Solution Overview` + `## Files to Modify` is fine for single-shot work.
+
+### Per-phase structure
+
+Each phase is a `### Phase N — {short title}` heading. The phase block is **self-contained**: everything scoped to that
+phase (acceptance scenarios, risks, verification, implementation notes) lives inside it, not scattered across top-level
+sections. This is a deliberate readability rule — the user expects related things grouped together. Skim a phase
+top-to-bottom and you have the full picture.
+
+```markdown
+### Phase N — {short title}
+
+**Status**
+- [ ] Not started
+- [ ] In progress
+- [ ] Shipped YYYY-MM-DD
+- [ ] Deferred
+
+#### Plan
+
+{Tight summary of what this phase ships, what it doesn't, and why this slice. Pipeline steps, file targets, behaviours.
+Riffing-level concise — same density as a flat FD's Solution Overview.}
+
+#### Acceptance criteria
+
+##### Scenario: {phase-scoped scenario name}
+- **Given** {precondition}
+- **When** {action}
+- **Then** {outcome}
+
+(One scenario per key behaviour for THIS phase.)
+
+#### Risks & verification
+
+| ID | Risk | Mitigation | Verification |
+| --- | --- | --- | --- |
+| Rn | {phase-scoped risk} | {concrete mitigation} | Vn |
+
+##### Vn — {short title} (Rn)
+- [ ] {concrete check, ticked when run}
+
+#### Implementation notes
+
+_(filled in during/after implementation — leave empty until then)_
+```
+
+Cross-phase content (Problem Description, the Decisions table, Open Questions) stays at the top of the FD as global
+sections. Anything phase-scoped belongs inside the phase block.
+
+**Status uses a checkbox list, not prose.** Mirrors the top-of-FD overall status block; consistent visual language
+across the document.
+
+**Verification entries use checkboxes** (`- [ ] {check}`) so reviewers can tick them off as they run them.
+
+**Risk and verification IDs are unique across the whole FD**, even though they live inside phase blocks (so R3 in Phase
+1, R4 in Phase 2 — never two R3s). Phase-2 IDs continue from where Phase 1 left off.
+
+### The implementation template
+
+Once a phase ships, fill in its `#### Implementation notes` block using this template. It is intentionally more verbose
+than the Plan block — a reviewer with no session context should be able to reconstruct the change from these notes
+alone.
+
+```markdown
+#### Implementation notes
+
+##### Files touched
+
+- `path/to/file.ts` — {what changed, in one line. Reference the function or section if non-obvious.}
+- `path/to/other.ts` (new) — {what it is and why.}
+
+(No new dependencies / Added dep `foo@1.2`. / No env vars added. / No DB changes.)
+
+##### Deviations from the plan
+
+- **{Heading of the deviation}.** {One short paragraph: what the plan said, what was actually done, why the change was
+  made, whether it was reversible. If a deviation should have looped back to the user but didn't, flag that explicitly.}
+
+(Use `_None._` if the implementation matched the plan exactly.)
+
+##### How to test (manual, this session)
+
+1. {Concrete step a reviewer can run.}
+2. {Next step.}
+3. {What to look for to confirm the phase is good.}
+
+##### Verification status
+
+- V1 — {pass / fail / pending user manual test}.
+- V2 — …
+
+##### Follow-ups deferred
+
+- {Anything the implementation surfaced that didn't ship in this phase. If big enough to warrant its own FD, say so.}
+
+(Use `_None._` if nothing was deferred.)
+```
+
+Verbosity rule: **Plan blocks stay terse, Implementation notes get verbose.** During planning, riff at the Plan
+density. During implementation, the notes are the durable record of what actually happened.
+
+### Cost discipline during implementation
+
+The same defer-to-smaller-models rule from the planning loop applies once you're implementing the FD's phases — and
+arguably matters more, because implementation work fans out across many files. Concretely:
+
+- **Reading the codebase to confirm a file path or current behaviour** → `Explore` subagent (Haiku-class).
+- **Generating boilerplate** (migrations, route handlers from a template, test scaffolds) → `general-purpose` subagent
+  with `model: "haiku"` or `"sonnet"`, given the relevant spec slice as context.
+- **Drafting Implementation-notes blocks** (Files touched, How-to-test, Verification status) → `general-purpose`
+  subagent with `model: "haiku"`; the top-level session reviews and edits.
+- **Reserve Opus for**: applying user feedback to the spec, resolving spec/code contradictions, security-sensitive
+  edits, and anything where getting it wrong wastes more than the model-cost saving.
+
+Cheapest path: top-level session decides *what* to do, subagent does it, top-level session reviews the diff. Don't
+skip the review — small models will sometimes drift — but do skip the manual-typing toil.
+
+#### Model routing table (mandatory in every Plan / phase Plan)
+
+The defer-to-smaller-models rule above is theoretical until you write it down per step. **Every Plan block — flat or
+phased — includes a Model routing table** so the cheapest viable model is picked deliberately rather than by reflex.
+
+Template (paste verbatim into the Plan block, fill in per-step):
+
+```markdown
+#### Model routing
+
+| Step | Model      | Reason                                                  |
+| ---- | ---------- | ------------------------------------------------------- |
+| 1    | **haiku**  | {one line — pure mechanical work}                       |
+| 2    | **sonnet** | {one line — bounded judgement, well-specified}          |
+| 3    | **opus**   | {one line — design / risky / cross-cutting / synthesis} |
+
+If a sonnet/haiku step surfaces a non-trivial decision, escalate to the main session rather than guess.
+```
+
+**Rubric for picking the model:**
+
+- **haiku** — pure mechanical: run a command, grep, count lines, file moves, single-line edits, install a dep, confirm
+  a number, paste known content. No judgement required; if the agent has to choose between options, it's not haiku-class.
+- **sonnet** — bounded judgement: apply a pattern the FD specifies, refactor following a recipe, fix lint errors with
+  clear rules, write boilerplate from a spec, classify hits into a fixed set of buckets. The agent makes small calls
+  inside well-defined rails.
+- **opus** (= top-level session) — design, architecture, risky migrations, cross-cutting changes, synthesising multiple
+  inputs, anything where getting it wrong wastes more than the model-cost saving. Don't delegate this.
+
+**Rules:**
+
+- **Each step in the Plan gets a row.** No row → no execution. If a step has no row, the Plan is incomplete.
+- **Default towards cheaper.** If you're choosing between sonnet and opus and the work is well-specified by the FD,
+  pick sonnet. Reserve opus for the parts where the FD doesn't fully prescribe the answer.
+- **The escalation line is mandatory.** Sonnet/haiku subagents must know they can return without guessing — they will
+  guess otherwise.
+- **Re-evaluate after the design step.** Once the inventory/design step (usually opus) is done, the remaining steps are
+  often more mechanical than first thought; downgrade them if so.
+
+### When implementation notes get written
+
+Implementation notes are NOT written by the planning loop. They're written:
+
+- During the implementation task, immediately after each phase's code lands (or in tight increments as code lands).
+- Or retroactively, when the user asks ("update the FD with what you did", "add implementation notes for Phase N").
+
+The planning skill's job is to (a) decide whether the FD has phases, (b) lay out the per-phase Plan blocks, and (c)
+leave the Implementation notes placeholder so the structure is ready when implementation starts.
+
+### Updating the Decisions table during implementation
+
+If a unilateral decision was made during implementation (e.g. "coalesce horizontal runs in the EPS writer"), append it
+to the existing Decisions table with an `(impl)` tag in the Question column so the audit trail captures decisions made
+outside the planning loop. Keep the table chronological — implementation decisions go at the bottom.
+
 ## Sign-off gate
 
 You are finished ONLY when:
@@ -199,11 +405,14 @@ You are finished ONLY when:
 2. The spec sections (Problem, Data, Label rules, Click handler, Files to modify, Verification, etc.) are
    self-consistent — you could hand the document to someone cold and they could implement it.
 3. The `## Acceptance Criteria` section has at least one scenario per key user-visible behaviour.
-4. The user has explicitly confirmed they want to proceed. Common sign-off phrases: "looks good, start coding", "go", "
+4. **Every Plan block (flat or per-phase) has a populated Model routing table** — one row per step, model picked
+   deliberately from the rubric, escalation line present. See "Model routing table (mandatory in every Plan / phase
+   Plan)". A Plan without this table isn't signed off, no matter how good the rest looks.
+5. The user has explicitly confirmed they want to proceed. Common sign-off phrases: "looks good, start coding", "go", "
    implement it", "ship it", "approved". If the user's latest message doesn't clearly sign off, ask: "Is this ready to
    implement, or do you want another pass?" — one sentence, then stop.
 
-Until all four are true, stay in the loop. Do not write any code. Do not start edits to the implementation files. Do
+Until all five are true, stay in the loop. Do not write any code. Do not start edits to the implementation files. Do
 not even read the implementation files unless you need them to answer a planning question.
 
 ## Spec graduation (post sign-off)
@@ -239,6 +448,7 @@ Rules for the spec file:
 ## Hard rules
 
 - **No code edits during this skill.** Only edits to the plan file and (where justified) to the user's memory system.
+  Implementation-notes updates to the FD happen in a separate task, not during the planning loop.
 - **Always fold answers into the main spec.** Orphaned answers in an "Open questions" area while the rest of the spec is
   stale is the most common failure mode of this skill — guard against it.
 - **Never hide questions from the user by asking them only in chat.** If it's a decision that shapes the spec, it goes
@@ -256,6 +466,16 @@ Rules for the spec file:
 - **Risks are a table, not prose, and every row cites a test.** See "Risks section" above. Failing to tie each risk to a
   `Vn` test ID in the Verification section is a failure mode — the whole point of documenting the risk is to ensure it
   gets tested.
+- **Defer to smaller models for routine reads.** When you need to read a known file, grep for a specific symbol, or
+  fetch a single doc page during the planning loop, do it directly with `Read` / `Grep` / `WebFetch`. But anything that
+  fans out — exploring an unfamiliar subsystem, finding all call-sites of a symbol, summarising a long doc, comparing
+  multiple files — should be delegated to a subagent with `model: "haiku"` (or `"sonnet"` if the task needs reasoning).
+  Reserve the top-level Opus session for the synthesis work that actually needs it: reconciling user answers with the
+  spec, judging risk severity, deciding question wording. The planning loop is mostly orchestration; don't pay Opus
+  rates for grep.
+- **Every Plan block has a Model routing table.** A Plan section without per-step model assignments isn't signed off,
+  even if every other section is complete. Use the template in "Model routing table (mandatory in every Plan / phase
+  Plan)" above. The sign-off gate enforces this.
 
 ## Example cycle
 
@@ -286,5 +506,15 @@ Cycle 2 (user ticks Q1's recommended option and adds a note on Q2):
 Cycle N (user says "looks good, ship it"):
 
 - Verify sign-off gate conditions.
+- If the FD has phases, confirm each phase has a `#### Plan` block populated and an empty `#### Implementation notes`
+  placeholder ready.
 - Confirm in chat: "Signed off. Switching out of planning mode — want me to start the implementation now?"
 - Exit the skill. Implementation is a separate task.
+
+Post-implementation (separate task, not part of the planning loop):
+
+- After Phase N's code lands, append the Implementation notes block to that phase using the template above.
+- Files touched, deviations, test instructions, verification status, follow-ups.
+- Update the Status line on Phase N to `✅ Shipped YYYY-MM-DD`.
+- If a unilateral implementation decision was made, log it in the Decisions table tagged `(impl)`.
+- Update the top-of-FD Status checkboxes (`In-progress`, `Partly implemented`, `Done`) to match reality.

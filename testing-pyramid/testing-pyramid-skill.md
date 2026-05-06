@@ -7,6 +7,13 @@ metadata:
 
 # Testing Pyramid
 
+## Harness role
+
+This skill is a **guide (feedforward control)** in the **behaviour** harness, in the sense used by Birgitta Böckeler in [*Harness Engineering*](https://martinfowler.com/articles/harness-engineering.html). It runs **pre-implementation** (Mode A — Plan) and **post-implementation / on cadence** (Mode B — Audit).
+
+- **Computational checks it produces:** the test plan itself becomes part of the deterministic gate — every behaviour in the surface-area table is a test that runs in the relevant CI tier.
+- **Inferential checks it performs:** layer-fit judgement, bloat detection, gap detection, layer-pick decisions (Mode C).
+
 This skill plans or audits a project's test coverage using the testing pyramid as the rubric. It does NOT write tests — it produces a coverage map, identifies gaps and bloat, and outputs a prioritised edit list. Implementation is a separate task.
 
 The pyramid the skill uses:
@@ -178,6 +185,16 @@ A single markdown file at `.plans/testing-pyramid/TP-XXX - <app> - <topic|audit>
 ## Files to create / modify
 | File | Pass | Type (create/modify/done) | Notes |
 
+## Model routing
+
+| Step | Model      | Reason                                                  |
+| ---- | ---------- | ------------------------------------------------------- |
+| 1    | **haiku**  | {one line — pure mechanical work}                       |
+| 2    | **sonnet** | {one line — bounded judgement, well-specified}          |
+| 3    | **opus**   | {one line — design / risky / cross-cutting / synthesis} |
+
+If a sonnet/haiku step surfaces a non-trivial decision, escalate to the main session rather than guess.
+
 ## Out of scope
 {bullets}
 ```
@@ -192,6 +209,46 @@ Inline answer only. Format:
 > **Why:** <one sentence>
 > **File:** `<path>` (existing or new)
 > **Why not the next layer up:** <one sentence — what mocks would still apply>
+
+## Model routing table (mandatory in every Mode A / Mode B plan)
+
+The defer-to-smaller-models rule is theoretical until you write it down per step. **Every Mode A and Mode B plan
+includes a Model routing table** (in the `## Model routing` section of the output) so the cheapest viable model is
+picked deliberately rather than by reflex.
+
+Template (shown in the output format above — fill in one row per pass of the "Files to create / modify" list):
+
+```markdown
+## Model routing
+
+| Step | Model      | Reason                                                  |
+| ---- | ---------- | ------------------------------------------------------- |
+| 1    | **haiku**  | {one line — pure mechanical work}                       |
+| 2    | **sonnet** | {one line — bounded judgement, well-specified}          |
+| 3    | **opus**   | {one line — design / risky / cross-cutting / synthesis} |
+
+If a sonnet/haiku step surfaces a non-trivial decision, escalate to the main session rather than guess.
+```
+
+**Rubric for picking the model:**
+
+- **haiku** — pure mechanical: run a command, grep, count lines, file moves, single-line edits, install a dep, confirm
+  a number, paste known content. No judgement required; if the agent has to choose between options, it's not haiku-class.
+- **sonnet** — bounded judgement: apply a pattern the plan specifies, refactor following a recipe, fix lint errors with
+  clear rules, write boilerplate from a spec, classify hits into a fixed set of buckets. The agent makes small calls
+  inside well-defined rails.
+- **opus** (= top-level session) — design, architecture, risky migrations, cross-cutting changes, synthesising multiple
+  inputs, anything where getting it wrong wastes more than the model-cost saving. Don't delegate this.
+
+**Rules:**
+
+- **Each pass in "Files to create / modify" gets a row.** No row → no execution. If a pass has no row, the plan is incomplete.
+- **Default towards cheaper.** If you're choosing between sonnet and opus and the work is well-specified by the plan,
+  pick sonnet. Reserve opus for the parts where the plan doesn't fully prescribe the answer.
+- **The escalation line is mandatory.** Sonnet/haiku subagents must know they can return without guessing — they will
+  guess otherwise.
+- **Re-evaluate after the design step.** Once the inventory/design step (usually opus) is done, the remaining steps are
+  often more mechanical than first thought; downgrade them if so.
 
 ## Iteration loop (Mode A and Mode B)
 
@@ -251,7 +308,10 @@ Don't declare the plan/audit done until ALL of the following are true:
 
 1. Every question in the file is answered — no unticked checkboxes in `## Open questions`, no `{your note here}` placeholders the user was expected to fill.
 2. The plan sections (Surface area / Findings, Files to create / modify, Pyramid shape, etc.) are self-consistent — you could hand the document to someone cold and they could execute it without re-asking the user.
-3. The user has explicitly confirmed they want to proceed. Common sign-off phrases: "looks good, start writing", "go", "implement", "ship it", "approved". If the user's latest message doesn't clearly sign off, ask: "Is this ready to implement, or do you want another pass?" — one sentence, then stop.
+3. **The `## Model routing` table is populated** — one row per pass of the "Files to create / modify" list, model picked
+   deliberately from the rubric, escalation line present. See "Model routing table (mandatory in every Mode A / Mode B
+   plan)". A plan without this table isn't signed off, no matter how good the rest looks.
+4. The user has explicitly confirmed they want to proceed. Common sign-off phrases: "looks good, start writing", "go", "implement", "ship it", "approved". If the user's latest message doesn't clearly sign off, ask: "Is this ready to implement, or do you want another pass?" — one sentence, then stop.
 
 Until all three are true, stay in the loop. Do not start writing test files. Do not even read the implementation source files unless they're needed to answer a planning question.
 
@@ -268,6 +328,17 @@ Until all three are true, stay in the loop. Do not start writing test files. Do 
 - **Watch for project-wide feedback while iterating.** If the user shares something that clearly applies beyond this plan ("I prefer X over Y everywhere"), save it to auto-memory in the same cycle it's folded into the plan — don't wait for a separate invitation.
 - **Keep update messages terse.** The plan file is the durable artefact. Chat messages between cycles should be ≤120 words and never repeat content that's already in the file.
 - **Ask before guessing.** If an answer is ambiguous, raise it as a new question in the next cycle rather than picking unilaterally. If the decision is tiny and blocks progress, flag the unilateral pick explicitly in the chat summary so the user can override.
+- **Defer to smaller models for routine reads.** When you need to read a known file,
+  grep for a specific symbol, or fetch a single doc page, do it directly with `Read` /
+  `Grep` / `WebFetch`. But anything that fans out — exploring an unfamiliar subsystem,
+  finding all call-sites of a symbol, summarising a long doc, comparing multiple files —
+  should be delegated to a subagent with `model: "haiku"` (or `"sonnet"` if the task
+  needs reasoning). Reserve the top-level Opus session for the synthesis work that
+  actually needs it: judging test layering, weighing tradeoffs, writing the final plan.
+  Don't pay Opus rates for grep.
+- **Every Mode A / Mode B plan has a Model routing table.** A plan whose `## Model routing` section is unfilled isn't
+  signed off, even if every other section is complete. Use the template in "Model routing table (mandatory in every
+  Mode A / Mode B plan)" above. The sign-off gate enforces this.
 
 ## Reference: suggested test layout
 

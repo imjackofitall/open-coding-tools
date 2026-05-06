@@ -11,9 +11,9 @@ Summary
 Spec Compliance
 _(omit section if no spec was found)_
 
-| Scenario | Status | Notes |
-|---|---|---|
-| {scenario name} | ✅ / ⚠️ / ❌ / — | |
+| Scenario        | Status            | Notes |
+|-----------------|-------------------|-------|
+| {scenario name} | ✅ / ⚠️ / ❌ / — |       |
 
 Blocker
 

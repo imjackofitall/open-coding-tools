@@ -105,12 +105,12 @@ alter table public.articles drop column tags;
 
 ## Files to Modify
 
-| Area | Files |
-|---|---|
-| migration | `supabase/migrations/20260112000000_article_tags.sql` |
-| db query | `apps/reading-list/lib/db/articles.ts`, `apps/reading-list/lib/db/tags.ts` |
-| inbox page | `apps/reading-list/app/inbox/page.tsx` |
-| filter UI | `apps/reading-list/components/TagFilter.tsx` (new), `components/ui/MultiSelect.tsx` (new) |
+| Area       | Files                                                                                     |
+|------------|-------------------------------------------------------------------------------------------|
+| migration  | `supabase/migrations/20260112000000_article_tags.sql`                                     |
+| db query   | `apps/reading-list/lib/db/articles.ts`, `apps/reading-list/lib/db/tags.ts`               |
+| inbox page | `apps/reading-list/app/inbox/page.tsx`                                                    |
+| filter UI  | `apps/reading-list/components/TagFilter.tsx` (new), `components/ui/MultiSelect.tsx` (new) |
 
 ## Verification
 
@@ -136,11 +136,11 @@ Every risk row below cites a `Vn` test ID.
 
 ## Risks & new issues surfaced by this investigation
 
-| ID | Risk | Mitigation | Verification |
-|---|---|---|---|
-| R1 | Backfill silently drops tags whose `tags` row was deleted but whose name still appears in `articles.tags` | Pre-flight query lists orphans before the migration runs; if non-zero, create the missing tag rows first | V1 |
-| R2 | Tag-load failure renders the same UI as a brand-new account, hiding the failure | Inline error banner (resolved by Q2 option B) | V3 |
-| R3 | Per-keystroke search refetch combines badly with the new filter — N tag toggles × M search keystrokes | Debounce search input at 250ms (existing `useDebouncedValue`) | V2 |
+| ID | Risk                                                                                                    | Mitigation                                                                                              | Verification |
+|----|---------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|--------------|
+| R1 | Backfill silently drops tags whose `tags` row was deleted but whose name still appears in `articles.tags` | Pre-flight query lists orphans before the migration runs; if non-zero, create the missing tag rows first | V1           |
+| R2 | Tag-load failure renders the same UI as a brand-new account, hiding the failure                         | Inline error banner (resolved by Q2 option B)                                                           | V3           |
+| R3 | Per-keystroke search refetch combines badly with the new filter — N tag toggles × M search keystrokes   | Debounce search input at 250ms (existing `useDebouncedValue`)                                           | V2           |
 
 ## Open Questions
 
@@ -148,11 +148,11 @@ _(none — signed off, ready to implement Phase 2)_
 
 ## Decisions
 
-| ✅ | Question | Decision | Why |
-|---|---|---|---|
-| ✅ | Q1 — Multi-tag filter semantics | OR (article matches any selected tag) | Matches user expectation from competing readers; AND is a follow-up if asked for |
-| ✅ | Q2 — Tag-load failure UI | Inline banner with retry, distinct from empty state | Empty state is a real product state; conflating it with "fetch failed" hides bugs |
-| ✅ | Q3 — Filter persistence | URL params (`?tags=...`) | Shareable, back-button friendly, no extra storage |
+| ✅ | Question                        | Decision                                            | Why                                                                               |
+|----|---------------------------------|-----------------------------------------------------|-----------------------------------------------------------------------------------|
+| ✅ | Q1 — Multi-tag filter semantics | OR (article matches any selected tag)               | Matches user expectation from competing readers; AND is a follow-up if asked for  |
+| ✅ | Q2 — Tag-load failure UI        | Inline banner with retry, distinct from empty state | Empty state is a real product state; conflating it with "fetch failed" hides bugs |
+| ✅ | Q3 — Filter persistence         | URL params (`?tags=...`)                            | Shareable, back-button friendly, no extra storage                                 |
 
 ## Status — signed off
 
