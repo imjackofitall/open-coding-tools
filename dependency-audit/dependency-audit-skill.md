@@ -260,6 +260,19 @@ New answers usually raise new questions. Surface them **in the file** (not chat-
 ### Beat 5 — Report back and wait
 Send a terse chat message (≤120 words): what was folded, what new questions exist (by ID), and any unilateral pick (flagged so the user can override). Then stop.
 
+## Implementation handoff (applying the actions)
+
+When the user signals the audit is ready to action (phrases like "apply these", "do the actions", "ship it", "start the migration"):
+
+1. **Re-read the report end-to-end** — the user may have re-classified packages or re-ordered the action list.
+2. **Pick the active scope** by walking `## Prioritised action list` top-to-bottom. Each numbered item becomes one task. Stop at the boundary the user named, if any ("just do the zero-effort wins", "everything except the moment migration").
+3. **Mirror each action into visible task tracking** using `TaskCreate` — one task per action item, titled with the package or scope and the verb ("Replace `axios` with native `fetch` (4 sites)").
+4. **Update tasks live as work proceeds.** Mark each `in_progress` before starting, `completed` when the action lands AND the relevant computational checks are green: `npm install` clean, lockfile delta sane, `npm audit` no new advisories, tests + typecheck + lint green. Do not batch completions.
+5. **Mirror status back into the report.** Flip the affected Phase 2 row to `done ✓` (or strike the row through). Tick off the action in the prioritised list. Update `Status:` in the header (`Phase 2 in progress` → `done`).
+6. **Force-fixes still need per-package approval.** Even mid-implementation, never bulk-apply `--force`. One task per force-fix, each one waiting on explicit go-ahead before flipping to `in_progress`.
+7. **Block on red.** Migration broke a test? Leave the task `in_progress`, note the failure in chat, and update the row's Notes. Don't silently mark complete.
+8. **Done means both surfaces agree.** Implementation is complete only when every chosen action is resolved in code AND the report reflects the resolved state.
+
 ## Sign-off gate
 
 Don't declare the audit complete until ALL of:

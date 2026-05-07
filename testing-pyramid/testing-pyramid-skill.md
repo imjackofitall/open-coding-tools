@@ -304,6 +304,18 @@ Example:
 | ✅ | Q2 — Test runner config split | Single config covering unit + integration | CI parallelism not yet a bottleneck |
 ```
 
+## Implementation handoff (writing the tests)
+
+When the user signals the plan/audit is ready to execute (phrases like "write the tests", "implement the plan", "ship it", "fix the bloat"):
+
+1. **Re-read the plan/audit file end-to-end** — Surface area / Findings rows may have been edited; layer choices may have shifted.
+2. **Pick the active scope** by walking the `## Files to create / modify` table in Pass order: P1 first, then P2, then P3. Stop at the pass the user named, if any.
+3. **Mirror each row into visible task tracking** using `TaskCreate` — one task per file (or per behaviour for big files), titled with the test file path and the verb (`create tests/integration/inbox.test.ts`, `delete bloat in tests/e2e/heading-visible.spec.ts`).
+4. **Update tasks live as work proceeds.** Mark each `in_progress` before starting, `completed` when the file is written AND the relevant runner is green at that layer (unit/integration/e2e config). Do not batch.
+5. **Mirror status back into the plan.** Flip the row's `Type` column from `create` / `modify` / `delete` to `done` (don't delete the row). Update `## Pyramid shape (current)` after each pass — actual file counts per layer plus a one-line note on what's done and what remains.
+6. **Block on red.** A flaky or failing test is not "done". Leave the task `in_progress`, note it in the row's Notes column, and surface in chat.
+7. **Done means both surfaces agree.** Implementation is complete only when every chosen-pass row is `done` AND the task list is fully `completed`.
+
 ## Sign-off gate (Mode A and Mode B)
 
 Don't declare the plan/audit done until ALL of the following are true:

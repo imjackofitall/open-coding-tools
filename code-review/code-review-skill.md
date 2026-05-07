@@ -157,6 +157,18 @@ The markdown file uses real markdown (no bare-line frontmatter — GitHub render
 
 Each finding is a list item: `` `file:line` — finding — why it matters — what to do.``
 
+## Implementation handoff (fixing the findings)
+
+When the user signals they want the review's findings fixed (phrases like "fix these", "address the review", "ship the fixes", "do it"):
+
+1. **Re-read the review file end-to-end** — the user may have annotated, downgraded, or added findings.
+2. **Pick the active scope** in this order: every `Blocker` first, then `Major`, then `Minor`, then `Nit`. Skip `Out of scope but worth noting` unless explicitly asked.
+3. **Mirror each finding into visible task tracking** using `TaskCreate` — one task per finding, titled with the `file:line` and a short verb ("Fix tag-load fallback at `inbox/page.tsx:88`"). Severity goes in the description.
+4. **Update tasks live as work proceeds.** Mark each `in_progress` before starting, `completed` when the change is made and the relevant computational checks (typecheck, test, lint) are green. Do not batch.
+5. **Mirror status back into the review file.** Replace each addressed finding's bullet with a struck-through line plus a one-line note ("Fixed — debounce wired in `useDebouncedValue`"). Update the verdict line at the top if the remaining findings change the merge guidance.
+6. **Block on red.** If a fix breaks tests or lint, leave the task `in_progress`, note the regression below the finding, and surface it in chat. Don't silently call it done.
+7. **Done means both surfaces agree.** Implementation is complete only when every chosen-severity finding is resolved in code AND the review file reflects the resolved state.
+
 ## What the reviewer must NOT do
 
 - Don't refactor unprompted.

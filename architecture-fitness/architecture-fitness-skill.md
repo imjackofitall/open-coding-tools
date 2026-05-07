@@ -161,6 +161,19 @@ Cap at ~3 per round. New characteristics often surface new threshold questions; 
 ### Beat 5 — Report back and wait
 Send a terse chat message (≤120 words): what was folded, what new questions exist (by ID), and any unilateral pick (flagged so the user can override). Then stop.
 
+## Implementation handoff (wiring the fitness functions)
+
+When the user signals the spec is ready to enforce (phrases like "wire these up", "ship the checks", "enforce them", "make them fail the build"):
+
+1. **Re-read the spec end-to-end** — thresholds and ownership may have moved since the last cycle.
+2. **Pick the active scope** by walking `## Characteristics` top-to-bottom and selecting every row whose `Enforcement state` is `gap`. Skip rows already `enforced ✓` and rows marked `accepted gap` or `out of scope`.
+3. **Mirror each chosen row into visible task tracking** using `TaskCreate` — one task per characteristic, titled with the AF ID and the fitness function (`AF4 — wire axe-core in tests/e2e/a11y.spec.ts`). Description carries the threshold.
+4. **Update tasks live as work proceeds.** Mark each `in_progress` before starting, `completed` only when (a) the fitness function exists in config / CI / the alert system, (b) the threshold is encoded as a number, and (c) a deliberate failing run was observed at least once (proving it actually fails the build, not just runs). Do not batch.
+5. **Mirror status back into the spec.** Flip the row's `Enforcement state` from `gap` to `enforced ✓` and cite the config path inline. Update `Status:` in the header (`open` → `in progress` → `live`).
+6. **Default to warn-only first if violations exist today.** Land the function in non-blocking mode, get the existing violations to zero, then flip to fail. The task isn't `completed` until it actually fails on regression — explicitly track the flip date in the row's Notes.
+7. **Block on red.** A check that "runs" but never fails is theatre. If you can't make it fail on a deliberate regression, leave the task `in_progress` and surface that in chat.
+8. **Done means both surfaces agree.** Implementation is complete only when every chosen row is `enforced ✓` AND every task is `completed`.
+
 ## Sign-off gate
 
 Don't declare the spec live until ALL of:

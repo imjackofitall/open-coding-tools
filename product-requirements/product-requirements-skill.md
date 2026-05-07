@@ -229,6 +229,18 @@ Then stop. The user will either answer the new questions (another cycle begins) 
 - When a question is resolved, fold the answer into the main PRD sections FIRST, then move the question to the decision
   table. Never skip the fold-in step.
 
+## Implementation handoff (kicking off the build)
+
+A PRD doesn't get implemented directly — its `## Implementation Plan` phases get turned into FDs that do. When the user signals the PRD is ready to start building (phrases like "start building", "kick off Phase 1", "let's begin"):
+
+1. **Re-read the PRD end-to-end** — wireframes, data model, and Implementation Plan must agree before any FD is spun up.
+2. **Pick the active phase** by walking `## Implementation Plan` top-to-bottom. The next un-shipped phase is the scope.
+3. **Mirror that phase into visible task tracking** using `TaskCreate` — one task per phase deliverable (e.g. "FD: auth flow", "FD: invite list view"). Each task description names the FD that will own the detail.
+4. **Update tasks live as the FDs are created and shipped.** Mark a phase task `in_progress` when its FD is signed off, `completed` when the FD's overall status flips to `Done`. Do not batch.
+5. **Mirror status back into the PRD.** Flip the phase's checkbox in the Implementation Plan, and update `## Status` at the top (`Open` → `In-progress` → `Partly implemented` → `Done`) as phases land.
+6. **Don't write code from this skill.** This skill's implementation handoff is purely about the bridge between PRD phases and the FDs that descend from them. The FD's own Implementation handoff section governs the per-phase build.
+7. **Done means both surfaces agree.** A PRD is fully implemented only when every phase task is `completed` AND the PRD status checkbox shows `Done`.
+
 ## Sign-off gate
 
 You are finished ONLY when:

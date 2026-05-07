@@ -398,6 +398,20 @@ If a unilateral decision was made during implementation (e.g. "coalesce horizont
 to the existing Decisions table with an `(impl)` tag in the Question column so the audit trail captures decisions made
 outside the planning loop. Keep the table chronological — implementation decisions go at the bottom.
 
+## Implementation handoff
+
+When the user signals the FD is ready to implement or fix (phrases like "ship it", "implement", "go", "start coding", "fix", "do it"):
+
+1. **Read the latest FD end-to-end** before touching any code. The user may have edited it since the last cycle.
+2. **Pick the active scope**:
+   - **Phased FD:** the next phase whose `Status` is not yet `Shipped`. Implement one phase at a time; do not jump ahead.
+   - **Flat FD:** the whole `## Files to Modify` list, ordered by the dependency between items.
+3. **Mirror the chosen scope into visible task tracking** using `TaskCreate` — one task per discrete unit (one task per file-to-modify, or one task per `Vn` verification check, whichever the FD lists more concretely). Use the same wording the FD uses so the two surfaces line up.
+4. **Update tasks live as work proceeds.** Mark each task `in_progress` before starting it, `completed` the moment the change lands. Do not batch — the user reads task state to know where you are.
+5. **Mirror status back into the FD.** Update `## Status`, the per-phase `Status` checkboxes, and any `Files to Modify` / `Verification` rows as their referenced task completes. The FD and the task list must agree.
+6. **Block on red.** If a `Vn` verification fails, leave the corresponding task `in_progress`, append a note to the phase's `## Implementation notes` block, and surface the failure in chat — don't silently mark the task complete.
+7. **Done means both surfaces agree.** Only declare the implementation done when every task is `completed` AND the FD's overall `Status` and per-phase `Status` reflect "shipped".
+
 ## Sign-off gate
 
 You are finished ONLY when:
