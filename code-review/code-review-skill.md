@@ -102,6 +102,8 @@ Check these against the rendered UI intent, not just the code structure. Only fl
 
 ## How to deliver the review
 
+The review is a dialogue surface, not a bullet dump. The user reads it, pushes back, asks clarifying questions, and ticks decisions — all without leaving the file. Default to the card format below.
+
 Start with a one-line verdict ("ship it after the two minors", "blocker on the {area}, hold", etc). Then a 2-3 sentence summary of what changed and the reviewer's read on it.
 
 If a spec was found (FD or `/specs/`), include a **Spec Compliance** section immediately after the summary, before severity findings. For each acceptance-criteria scenario, mark it:
@@ -112,7 +114,7 @@ If a spec was found (FD or `/specs/`), include a **Spec Compliance** section imm
 
 If no spec was found, omit the section entirely — don't write "no spec found" noise.
 
-Then findings grouped by severity, each as: `file:line` — finding — why it matters — what to do. Quote the offending line if useful. Skip the severity heading if a section is empty. End with "Out of scope but worth noting" only if there's something genuinely worth flagging that wasn't part of the diff.
+Then a **Quick status** table so the user can skim every finding's state at a glance, followed by findings grouped by severity as cards (see the next section for the exact card shape). Skip the severity heading if a section is empty. End with "Out of scope but worth noting" only if there's something genuinely worth flagging that wasn't part of the diff.
 
 ## Output location and filename
 
@@ -131,43 +133,110 @@ Examples:
 
 ## File contents
 
-The markdown file uses real markdown (no bare-line frontmatter — GitHub renders that as one paragraph). Match the shape in `CR-000 - code-review TEMPLATE.md`:
+The markdown file uses real markdown. No bare-line frontmatter — GitHub renders consecutive `key: value` lines as one paragraph. Headers go in a `## Header` section as a bullet list. The shape:
 
 ```markdown
 # Code review — <scope> — <change-short-name>
 
 ## Header
-- **ID:** CR-XXX
-- **Scope:** <scope>
-- **Change:** <change-short-name>
-- **Date:** YYYY-MM-DD
-- **Commit/branch:** <short SHA / branch name / "uncommitted">
-- **Spec:** FD-XXX / `/specs/<scope>/spec.md` / none
-- **Verdict:** <one-line verdict>
+
+- ID: CR-XXX
+- Scope: <scope>
+- Change: <change-short-name>
+- Date: YYYY-MM-DD
+- Commit/branch: <short SHA / branch name / "uncommitted">
+- Spec: FD-XXX / `/specs/<scope>/spec.md` / none
+- Verdict: <one-line verdict>
+
+## How to use this document
+
+Each finding is a card with:
+
+- **Decision** — a GFM task list. Tick exactly one option (`- [x]`).
+- **Your note** — anything the user wants to add for that finding (kept verbatim).
+- **My reply** — only present where the user asked a question, or where the reviewer expects pushback. Read once, then decide.
+
+When all decisions are filled in, say "address the review" and the reviewer works the accepted ones in priority order (Blocker → Major → Minor → Nit), mirroring each into TaskCreate and updating the card's status as fixes land.
+
+## Quick status
+
+| ID    | Sev      | File                                 | Status              |
+| ----- | -------- | ------------------------------------ | ------------------- |
+| B-01  | Blocker  | `path/to/file.ts` short hook         | pending             |
+| M-01  | Major    | `path/to/other.tsx` short hook       | pending — see reply |
+| MI-08 | Minor    | (withdrawn after pushback)           | withdrawn           |
+
+Status vocabulary: `pending`, `pending — see reply`, `accept`, `reject`, `defer`, `withdrawn`, `done`. Plain text only — markdown task-list checkboxes don't render inside table cells.
 
 ## Summary
-…
+
+2–3 sentences on what changed and the reviewer's read.
 
 ## Spec compliance
+
 (omit entirely if no spec)
 
-## Blocker / Major / Minor / Nit / Out of scope but worth noting
+## Blocker / Major / Minor / Nit
+
 (skip the heading entirely when a section is empty)
+
+### <ID> · <one-line title>
+
+**Where:** `file:line` (or a small list if the finding spans multiple sites)
+
+**Why:** one paragraph on what's wrong and what it costs. Don't pad — if it's obvious, one sentence is enough.
+
+**Fix:** what to do. Concrete enough to act on. Code snippet if the fix isn't a one-liner.
+
+**Your note:** _(only present if the user already left an inline comment in a prior pass; quote it verbatim)_
+
+**My reply:** _(only present where the user asked a question, or where the reviewer wants to pre-empt likely pushback)_
+
+**Decision (tick one):**
+
+- [ ] accept
+- [ ] reject
+- [ ] defer
+- [ ] needs more info
+
+**Your note:**
+
+---
+
+## Out of scope but worth noting
+
+(omit unless there's something genuinely worth flagging that wasn't in the diff)
 ```
 
-Each finding is a list item: `` `file:line` — finding — why it matters — what to do.``
+Card rules:
+
+- **Decision lists must be GFM task lists** (`- [ ] option` on their own line, blank line before the first item). Inline backtick-wrapped pseudo-checkboxes (`` `[ ] accept` ``) render as literal text and look broken — never use them. The same applies inside table cells: use plain status words there.
+- **Collapse decided cards.** Once a decision is made — either by the user ticking a box, or by you pre-ticking based on signal from chat — replace the entire checkbox list with a one-line `**Decision:** accept` (or `accept (cheap fix)`, `withdrawn`, `accept (Option A — skip step)`, etc.). The checkboxes are clutter once the answer is known. Only cards still awaiting a tick keep the full task list.
+- **Surface open questions at the top — with full context.** When the doc has more than one or two open decisions left, add an **Open questions — please answer** section right after "How to use this document". Move the *entire card* there: Where / Why / Fix / Your note / My reply / decision checkboxes. The reader is a technical decision-maker — they want enough information to decide without scrolling, not a teaser pointing them elsewhere. The body of the doc keeps a one-line placeholder under the same `### ID · title` heading: `→ Full card + decision at top: **Open questions — please answer**.` That preserves the severity-grouping audit trail without duplicating content. Never write "see card below" or "full context below" — if you're surfacing the question, surface the answer alongside it.
+- **Pre-tick decisions the user already signalled in chat.** If the user said "yes do it" before the file was written, the card lands with `**Decision:** accept` collapsed (no checkboxes) and the status table reads `accept`. Don't make them tick again.
+- **Custom options are fine.** When a finding has two real paths (cheap fix vs strong fix, option A vs option B, drop vs wire-through), expand the decision list to those concrete options rather than a generic accept/reject. Always include at least one "defer" or "reject" so the user can decline.
+- **One severity divider per group.** Between cards within a severity, use a single `---` horizontal rule on its own line; don't repeat the severity heading.
+- **Pushback is part of the format.** If the user rejects a finding, mark the card `— WITHDRAWN` in the title, strike the file reference, write a short "My reply" acknowledging the pushback, and set the decision to `**Decision:** withdrawn`. Don't argue. Don't quietly delete the card — the audit trail matters.
+
+Each finding gets a card. Don't collapse multiple findings into one card unless they're truly the same problem at multiple sites (e.g. one opacity-tint rule violated in four files — one card listing all sites).
+
+**Hard-wrap prose at 120 columns.** Every paragraph in the CR (and in any markdown the user reads or edits) wraps at ~120 cols. Tables and code blocks stay unwrapped. Long unwrapped prose lines look terrible in diffs and side-by-side IDE panes — don't make the user reformat your output.
 
 ## Implementation handoff (fixing the findings)
 
 When the user signals they want the review's findings fixed (phrases like "fix these", "address the review", "ship the fixes", "do it"):
 
-1. **Re-read the review file end-to-end** — the user may have annotated, downgraded, or added findings.
-2. **Pick the active scope** in this order: every `Blocker` first, then `Major`, then `Minor`, then `Nit`. Skip `Out of scope but worth noting` unless explicitly asked.
-3. **Mirror each finding into visible task tracking** using `TaskCreate` — one task per finding, titled with the `file:line` and a short verb ("Fix tag-load fallback at `inbox/page.tsx:88`"). Severity goes in the description.
-4. **Update tasks live as work proceeds.** Mark each `in_progress` before starting, `completed` when the change is made and the relevant computational checks (typecheck, test, lint) are green. Do not batch.
-5. **Mirror status back into the review file.** Replace each addressed finding's bullet with a struck-through line plus a one-line note ("Fixed — debounce wired in `useDebouncedValue`"). Update the verdict line at the top if the remaining findings change the merge guidance.
-6. **Block on red.** If a fix breaks tests or lint, leave the task `in_progress`, note the regression below the finding, and surface it in chat. Don't silently call it done.
-7. **Done means both surfaces agree.** Implementation is complete only when every chosen-severity finding is resolved in code AND the review file reflects the resolved state.
+1. **Re-read the review file end-to-end** — the user may have ticked decisions, added notes, downgraded findings, or asked clarifying questions in "Your note" sections. Honour every annotation.
+2. **Only act on findings whose decision is `accept`** (including specific variants like `accept A`, `accept cheap fix`, `accept (drop)`). Skip findings with `defer`, `reject`, `withdrawn`, `needs more info`, or still-empty decisions. If a "Your note" asks a question you can answer without code changes, answer it in chat and update "My reply" — don't start coding.
+3. **Pick the active scope** in this order: every accepted `Blocker` first, then `Major`, then `Minor`, then `Nit`. Skip `Out of scope but worth noting` unless explicitly asked.
+4. **Mirror each accepted finding into visible task tracking** using `TaskCreate` — one task per finding, titled with the finding ID + `file:line` and a short verb ("B-01: Fix `amountCents` trust slip at `api/payments/create/route.ts:14`"). Severity goes in the description.
+5. **Update tasks live as work proceeds.** Mark each `in_progress` before starting, `completed` when the change is made and the relevant computational checks (typecheck, test, lint) are green. Do not batch.
+6. **Mirror status back into the review file in two places.** When a finding lands:
+   - The card: update the title to `### <ID> · <title> — DONE`, add a `**Fixed:**` line under "Fix" with a one-line note ("debounce wired in `useDebouncedValue`"), tick the existing decision box (don't add new ones).
+   - The Quick status table: change `pending` / `accept` to `done`.
+   Also update the top-level `Verdict` line if the remaining unaddressed findings change the merge guidance.
+7. **Block on red.** If a fix breaks tests or lint, leave the task `in_progress`, add a `**Regression:**` line below the finding's "Fix", and surface it in chat. Don't silently call it done.
+8. **Done means both surfaces agree.** Implementation is complete only when every accepted finding is resolved in code AND the review file reflects the resolved state.
 
 ## What the reviewer must NOT do
 

@@ -479,6 +479,15 @@ Rules for the spec file:
 - **Ask before guessing.** If an answer is ambiguous, raise it as a new question in the next cycle rather than picking
   unilaterally. If you must pick unilaterally because the decision is tiny and blocks progress, flag it explicitly in
   the chat summary so the user can override.
+- **Lead with the best design, not the easiest one.** When laying out options, the recommended option is the one that
+  produces the best end state — not the one that touches fewer files. Concrete prerequisites the best design needs
+  (helper extraction, new primitive uptake, server flag, schema change) belong inside its scope. Do NOT label them
+  "out of scope — separate cleanup", "separate refactor", or "first uptake of this primitive" as a way of softening
+  toward a lazier path. Don't lean on caveats like "biggest refactor", "non-trivial", or "meaningful restructure" to
+  nudge the user toward the smaller option. If the bigger one is genuinely better, recommend it without softening; if
+  it's not, say why plainly. KISS means the simplest implementation of the **right** design, never picking a worse
+  design because it's smaller. This rule has a memory companion (`feedback_no_lazy_scoping.md`) that surfaces when
+  this pattern recurs — the FD itself should not need to learn it again.
 - **Risks are a table, not prose, and every row cites a test.** See "Risks section" above. Failing to tie each risk to a
   `Vn` test ID in the Verification section is a failure mode — the whole point of documenting the risk is to ensure it
   gets tested.
