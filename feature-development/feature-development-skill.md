@@ -53,7 +53,24 @@ Do NOT invoke this skill when:
 
 Each cycle of the loop has four beats:
 
+### Re-entry: what an update signal means
+
+When the user returns mid-FD, **classify their message before acting**:
+
+- **Loop-resume signals** — "I updated the FD", "I answered the questions", "updated", "review my answers", "take
+  another look", "see my notes", "another pass", "I ticked some boxes". These mean: **run Beat 1** (re-read the whole
+  file), fold in what changed, tick progress, raise the next round. They do **NOT** mean implement. This is the default —
+  if the message is anything other than an unambiguous go-ahead to write code, treat it as a loop-resume signal.
+- **Sign-off signals** — "ship it", "go", "implement it", "start coding", "approved", "do it". These trigger
+  Implementation handoff **only if the sign-off gate already passes** (see "Sign-off gate"). If the gate is not met, do
+  not implement — surface what's still open and resume the loop.
+
+When in doubt, you are in the loop, not in handoff. "I updated the FD" is never, by itself, permission to start coding.
+
 ### Beat 1 — Read current state
+
+**Beat 1 always runs first on any re-entry**, before any other action. You cannot fold answers or judge sign-off without
+re-reading the current file — the user may have edited it since your last turn.
 
 Read the full plan file. Identify:
 
@@ -400,8 +417,9 @@ outside the planning loop. Keep the table chronological — implementation decis
 
 ## Implementation handoff
 
-When the user signals the FD is ready to implement or fix (phrases like "ship it", "implement", "go", "start coding", "fix", "do it"):
+When the user **unambiguously signals the FD is ready to implement** ("ship it", "implement", "start coding") AND the sign-off gate passes:
 
+0. **Confirm this is a handoff, not a loop-resume.** If the message is an update/answer signal ("I updated the FD", "I answered", "review my notes", "updated", "take another look"), do NOT enter handoff — go to Beat 1 instead. See the "Re-entry: what an update signal means" rule at the top of the iteration loop. An update signal is never, by itself, permission to start coding.
 1. **Read the latest FD end-to-end** before touching any code. The user may have edited it since the last cycle.
 2. **Pick the active scope**:
    - **Phased FD:** the next phase whose `Status` is not yet `Shipped`. Implement one phase at a time; do not jump ahead.
@@ -426,7 +444,9 @@ You are finished ONLY when:
    Plan)". A Plan without this table isn't signed off, no matter how good the rest looks.
 5. The user has explicitly confirmed they want to proceed. Common sign-off phrases: "looks good, start coding", "go", "
    implement it", "ship it", "approved". If the user's latest message doesn't clearly sign off, ask: "Is this ready to
-   implement, or do you want another pass?" — one sentence, then stop.
+   implement, or do you want another pass?" — one sentence, then stop. An update/answer signal ("I updated the FD", "I
+   answered the questions") does NOT satisfy this condition — it resumes the loop. Only an explicit go-ahead, with gates
+   1–4 already met, ends the loop.
 
 Until all five are true, stay in the loop. Do not write any code. Do not start edits to the implementation files. Do
 not even read the implementation files unless you need them to answer a planning question.
