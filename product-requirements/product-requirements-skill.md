@@ -84,43 +84,6 @@ Named subsections for the most complex or non-obvious interactions (e.g. slide-o
 ## Implementation Plan
 Numbered phases, each with a short title and a bullet list of what gets built. Phases should be independently deployable or at least independently testable.
 
-### Model routing
-Each Implementation Plan phase includes a Model routing table so the cheapest viable model is picked deliberately rather than by reflex.
-
-Template (paste verbatim into each phase, fill in per-step):
-
-```markdown
-#### Model routing
-
-| Step | Model      | Reason                                                  |
-| ---- | ---------- | ------------------------------------------------------- |
-| 1    | **haiku**  | {one line — pure mechanical work}                       |
-| 2    | **sonnet** | {one line — bounded judgement, well-specified}          |
-| 3    | **opus**   | {one line — design / risky / cross-cutting / synthesis} |
-
-If a sonnet/haiku step surfaces a non-trivial decision, escalate to the main session rather than guess.
-```
-
-**Rubric for picking the model:**
-
-- **haiku** — pure mechanical: run a command, grep, count lines, file moves, single-line edits, install a dep, confirm
-  a number, paste known content. No judgement required; if the agent has to choose between options, it's not haiku-class.
-- **sonnet** — bounded judgement: apply a pattern the PRD specifies, refactor following a recipe, fix lint errors with
-  clear rules, write boilerplate from a spec, classify hits into a fixed set of buckets. The agent makes small calls
-  inside well-defined rails.
-- **opus** (= top-level session) — design, architecture, risky migrations, cross-cutting changes, synthesising multiple
-  inputs, anything where getting it wrong wastes more than the model-cost saving. Don't delegate this.
-
-**Rules:**
-
-- **Each step in the phase gets a row.** No row → no execution. If a step has no row, the Implementation Plan is incomplete.
-- **Default towards cheaper.** If you're choosing between sonnet and opus and the work is well-specified by the PRD,
-  pick sonnet. Reserve opus for the parts where the PRD doesn't fully prescribe the answer.
-- **The escalation line is mandatory.** Sonnet/haiku subagents must know they can return without guessing — they will
-  guess otherwise.
-- **Re-evaluate after the design step.** Once the inventory/design step (usually opus) is done, the remaining steps are
-  often more mechanical than first thought; downgrade them if so.
-
 ## Open Questions
 Active Q&A area (see format below). Moves to Decision Trail once all answered.
 
@@ -235,7 +198,7 @@ A PRD doesn't get implemented directly — its `## Implementation Plan` phases g
 
 1. **Re-read the PRD end-to-end** — wireframes, data model, and Implementation Plan must agree before any FD is spun up.
 2. **Pick the active phase** by walking `## Implementation Plan` top-to-bottom. The next un-shipped phase is the scope.
-3. **Mirror that phase into visible task tracking** using `TaskCreate` — one task per phase deliverable (e.g. "FD: auth flow", "FD: invite list view"). Each task description names the FD that will own the detail, plus the model assigned to that step per the phase's Model routing table (or the top-level session model if the row delegates to the main loop). Send a one-line chat message stating the active model before flipping the first task to `in_progress`.
+3. **Mirror that phase into visible task tracking** using `TaskCreate` — one task per phase deliverable (e.g. "FD: auth flow", "FD: invite list view"). Each task description names the FD that will own the detail.
 4. **Update tasks live as the FDs are created and shipped.** Mark a phase task `in_progress` when its FD is signed off, `completed` when the FD's overall status flips to `Done`. Do not batch.
 5. **Mirror status back into the PRD.** Flip the phase's checkbox in the Implementation Plan, and update `## Status` at the top (`Open` → `In-progress` → `Partly implemented` → `Done`) as phases land.
 6. **Don't write code from this skill.** This skill's implementation handoff is purely about the bridge between PRD phases and the FDs that descend from them. The FD's own Implementation handoff section governs the per-phase build.
@@ -249,10 +212,7 @@ You are finished ONLY when:
    expected to fill).
 2. All PRD sections are complete and self-consistent — Overview, Tech Stack, Users, Features, Data Model, UX Design, and
    Implementation Plan all say consistent things. A developer could read this PRD cold and know what they're building.
-3. **Every Implementation Plan phase has a populated Model routing table** — one row per step, model picked deliberately
-   from the rubric, escalation line present. See "Model routing" under `## Implementation Plan`. A phase without this
-   table isn't signed off, no matter how good the rest looks.
-4. The user has explicitly confirmed they want to proceed. Common sign-off phrases: "looks good", "go", "approved", "
+3. The user has explicitly confirmed they want to proceed. Common sign-off phrases: "looks good", "go", "approved", "
    ship it", "done". If the user's latest message doesn't clearly sign off, ask: "Is this PRD ready, or do you want
    another pass?" — one sentence, then stop.
 
@@ -279,16 +239,6 @@ answer a planning question.
 - **Ask before guessing.** If an answer is ambiguous, raise it as a new question in the next cycle rather than picking
   unilaterally. If you must pick unilaterally because the decision is tiny and blocks progress, flag it explicitly in
   the chat summary so the user can override.
-- **Defer to smaller models for routine reads.** When you need to read a known file, grep for a specific symbol, or
-  fetch a single doc page during the planning loop, do it directly with `Read` / `Grep` / `WebFetch`. But anything that
-  fans out — exploring an unfamiliar subsystem, finding all call-sites of a symbol, summarising a long doc, comparing
-  multiple files — should be delegated to a subagent with `model: "haiku"` (or `"sonnet"` if the task needs reasoning).
-  Reserve the top-level Opus session for the synthesis work that actually needs it: reconciling user answers with the
-  PRD, judging tradeoffs, deciding question wording. The planning loop is mostly orchestration; don't pay Opus rates
-  for grep.
-- **Every Implementation Plan phase has a Model routing table.** A phase without per-step model assignments isn't signed
-  off, even if every other section is complete. Use the template in "Model routing" under `## Implementation Plan`. The
-  sign-off gate enforces this.
 
 ## Example cycle
 

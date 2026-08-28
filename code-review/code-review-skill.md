@@ -229,7 +229,7 @@ When the user signals they want the review's findings fixed (phrases like "fix t
 1. **Re-read the review file end-to-end** — the user may have ticked decisions, added notes, downgraded findings, or asked clarifying questions in "Your note" sections. Honour every annotation.
 2. **Only act on findings whose decision is `accept`** (including specific variants like `accept A`, `accept cheap fix`, `accept (drop)`). Skip findings with `defer`, `reject`, `withdrawn`, `needs more info`, or still-empty decisions. If a "Your note" asks a question you can answer without code changes, answer it in chat and update "My reply" — don't start coding.
 3. **Pick the active scope** in this order: every accepted `Blocker` first, then `Major`, then `Minor`, then `Nit`. Skip `Out of scope but worth noting` unless explicitly asked.
-4. **Mirror each accepted finding into visible task tracking** using `TaskCreate` — one task per finding, titled with the finding ID + `file:line` and a short verb ("B-01: Fix `amountCents` trust slip at `api/payments/create/route.ts:14`"). Severity goes in the description. **Name the model in use.** Before flipping the first task to `in_progress`, send a one-line chat message stating which model is running this implementation pass (the top-level session model, e.g. `claude-opus-4-7`), and include that model name in each task's description so the surface visibly reflects the routing decision.
+4. **Mirror each accepted finding into visible task tracking** using `TaskCreate` — one task per finding, titled with the finding ID + `file:line` and a short verb ("B-01: Fix `amountCents` trust slip at `api/payments/create/route.ts:14`"). Severity goes in the description.
 5. **Update tasks live as work proceeds.** Mark each `in_progress` before starting, `completed` when the change is made and the relevant computational checks (typecheck, test, lint) are green. Do not batch.
 6. **Mirror status back into the review file in two places.** When a finding lands:
    - The card: update the title to `### <ID> · <title> — DONE`, add a `**Fixed:**` line under "Fix" with a one-line note ("debounce wired in `useDebouncedValue`"), tick the existing decision box (don't add new ones).
@@ -246,14 +246,6 @@ When the user signals they want the review's findings fixed (phrases like "fix t
 - Don't list every minor inconsistency — pick the ones that matter.
 - Don't recommend tests unless the change actually warrants them (a token swap doesn't need tests; a new API route does).
 - Don't suggest extracting shared packages or restructuring the project layout unless the user asked for it.
-- **Defer to smaller models for routine reads.** When you need to read a known file,
-  grep for a specific symbol, or fetch a single doc page, do it directly with `Read` /
-  `Grep` / `WebFetch`. But anything that fans out — exploring an unfamiliar subsystem,
-  finding all call-sites of a symbol, summarising a long doc, comparing multiple files —
-  should be delegated to a subagent with `model: "haiku"` (or `"sonnet"` if the task
-  needs reasoning). Reserve the top-level Opus session for the synthesis work that
-  actually needs it: judging severity, weighing tradeoffs, writing the final review.
-  Don't pay Opus rates for grep.
 
 ## Output format
 

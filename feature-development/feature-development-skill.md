@@ -344,61 +344,6 @@ alone.
 Verbosity rule: **Plan blocks stay terse, Implementation notes get verbose.** During planning, riff at the Plan
 density. During implementation, the notes are the durable record of what actually happened.
 
-### Cost discipline during implementation
-
-The same defer-to-smaller-models rule from the planning loop applies once you're implementing the FD's phases — and
-arguably matters more, because implementation work fans out across many files. Concretely:
-
-- **Reading the codebase to confirm a file path or current behaviour** → `Explore` subagent (Haiku-class).
-- **Generating boilerplate** (migrations, route handlers from a template, test scaffolds) → `general-purpose` subagent
-  with `model: "haiku"` or `"sonnet"`, given the relevant spec slice as context.
-- **Drafting Implementation-notes blocks** (Files touched, How-to-test, Verification status) → `general-purpose`
-  subagent with `model: "haiku"`; the top-level session reviews and edits.
-- **Reserve Opus for**: applying user feedback to the spec, resolving spec/code contradictions, security-sensitive
-  edits, and anything where getting it wrong wastes more than the model-cost saving.
-
-Cheapest path: top-level session decides *what* to do, subagent does it, top-level session reviews the diff. Don't
-skip the review — small models will sometimes drift — but do skip the manual-typing toil.
-
-#### Model routing table (mandatory in every Plan / phase Plan)
-
-The defer-to-smaller-models rule above is theoretical until you write it down per step. **Every Plan block — flat or
-phased — includes a Model routing table** so the cheapest viable model is picked deliberately rather than by reflex.
-
-Template (paste verbatim into the Plan block, fill in per-step):
-
-```markdown
-#### Model routing
-
-| Step | Model      | Reason                                                  |
-| ---- | ---------- | ------------------------------------------------------- |
-| 1    | **haiku**  | {one line — pure mechanical work}                       |
-| 2    | **sonnet** | {one line — bounded judgement, well-specified}          |
-| 3    | **opus**   | {one line — design / risky / cross-cutting / synthesis} |
-
-If a sonnet/haiku step surfaces a non-trivial decision, escalate to the main session rather than guess.
-```
-
-**Rubric for picking the model:**
-
-- **haiku** — pure mechanical: run a command, grep, count lines, file moves, single-line edits, install a dep, confirm
-  a number, paste known content. No judgement required; if the agent has to choose between options, it's not haiku-class.
-- **sonnet** — bounded judgement: apply a pattern the FD specifies, refactor following a recipe, fix lint errors with
-  clear rules, write boilerplate from a spec, classify hits into a fixed set of buckets. The agent makes small calls
-  inside well-defined rails.
-- **opus** (= top-level session) — design, architecture, risky migrations, cross-cutting changes, synthesising multiple
-  inputs, anything where getting it wrong wastes more than the model-cost saving. Don't delegate this.
-
-**Rules:**
-
-- **Each step in the Plan gets a row.** No row → no execution. If a step has no row, the Plan is incomplete.
-- **Default towards cheaper.** If you're choosing between sonnet and opus and the work is well-specified by the FD,
-  pick sonnet. Reserve opus for the parts where the FD doesn't fully prescribe the answer.
-- **The escalation line is mandatory.** Sonnet/haiku subagents must know they can return without guessing — they will
-  guess otherwise.
-- **Re-evaluate after the design step.** Once the inventory/design step (usually opus) is done, the remaining steps are
-  often more mechanical than first thought; downgrade them if so.
-
 ### When implementation notes get written
 
 Implementation notes are NOT written by the planning loop. They're written:
@@ -424,7 +369,7 @@ When the user **unambiguously signals the FD is ready to implement** ("ship it",
 2. **Pick the active scope**:
    - **Phased FD:** the next phase whose `Status` is not yet `Shipped`. Implement one phase at a time; do not jump ahead.
    - **Flat FD:** the whole `## Files to Modify` list, ordered by the dependency between items.
-3. **Mirror the chosen scope into visible task tracking** using `TaskCreate` — one task per discrete unit (one task per file-to-modify, or one task per `Vn` verification check, whichever the FD lists more concretely). Use the same wording the FD uses so the two surfaces line up. **Name the model on each task** per the phase's Model routing table (or the top-level session model if the row delegates to the main loop), and send a one-line chat message stating the active model before flipping the first task to `in_progress`.
+3. **Mirror the chosen scope into visible task tracking** using `TaskCreate` — one task per discrete unit (one task per file-to-modify, or one task per `Vn` verification check, whichever the FD lists more concretely). Use the same wording the FD uses so the two surfaces line up.
 4. **Update tasks live as work proceeds.** Mark each task `in_progress` before starting it, `completed` the moment the change lands. Do not batch — the user reads task state to know where you are.
 5. **Mirror status back into the FD.** Update `## Status`, the per-phase `Status` checkboxes, and any `Files to Modify` / `Verification` rows as their referenced task completes. The FD and the task list must agree.
 6. **Block on red.** If a `Vn` verification fails, leave the corresponding task `in_progress`, append a note to the phase's `## Implementation notes` block, and surface the failure in chat — don't silently mark the task complete.
@@ -439,14 +384,11 @@ You are finished ONLY when:
 2. The spec sections (Problem, Data, Label rules, Click handler, Files to modify, Verification, etc.) are
    self-consistent — you could hand the document to someone cold and they could implement it.
 3. The `## Acceptance Criteria` section has at least one scenario per key user-visible behaviour.
-4. **Every Plan block (flat or per-phase) has a populated Model routing table** — one row per step, model picked
-   deliberately from the rubric, escalation line present. See "Model routing table (mandatory in every Plan / phase
-   Plan)". A Plan without this table isn't signed off, no matter how good the rest looks.
-5. The user has explicitly confirmed they want to proceed. Common sign-off phrases: "looks good, start coding", "go", "
+4. The user has explicitly confirmed they want to proceed. Common sign-off phrases: "looks good, start coding", "go", "
    implement it", "ship it", "approved". If the user's latest message doesn't clearly sign off, ask: "Is this ready to
    implement, or do you want another pass?" — one sentence, then stop. An update/answer signal ("I updated the FD", "I
    answered the questions") does NOT satisfy this condition — it resumes the loop. Only an explicit go-ahead, with gates
-   1–4 already met, ends the loop.
+   1–3 already met, ends the loop.
 
 Until all five are true, stay in the loop. Do not write any code. Do not start edits to the implementation files. Do
 not even read the implementation files unless you need them to answer a planning question.
@@ -511,16 +453,6 @@ Rules for the spec file:
 - **Risks are a table, not prose, and every row cites a test.** See "Risks section" above. Failing to tie each risk to a
   `Vn` test ID in the Verification section is a failure mode — the whole point of documenting the risk is to ensure it
   gets tested.
-- **Defer to smaller models for routine reads.** When you need to read a known file, grep for a specific symbol, or
-  fetch a single doc page during the planning loop, do it directly with `Read` / `Grep` / `WebFetch`. But anything that
-  fans out — exploring an unfamiliar subsystem, finding all call-sites of a symbol, summarising a long doc, comparing
-  multiple files — should be delegated to a subagent with `model: "haiku"` (or `"sonnet"` if the task needs reasoning).
-  Reserve the top-level Opus session for the synthesis work that actually needs it: reconciling user answers with the
-  spec, judging risk severity, deciding question wording. The planning loop is mostly orchestration; don't pay Opus
-  rates for grep.
-- **Every Plan block has a Model routing table.** A Plan section without per-step model assignments isn't signed off,
-  even if every other section is complete. Use the template in "Model routing table (mandatory in every Plan / phase
-  Plan)" above. The sign-off gate enforces this.
 
 ## Example cycle
 

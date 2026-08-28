@@ -167,7 +167,7 @@ When the user signals the spec is ready to enforce (phrases like "wire these up"
 
 1. **Re-read the spec end-to-end** — thresholds and ownership may have moved since the last cycle.
 2. **Pick the active scope** by walking `## Characteristics` top-to-bottom and selecting every row whose `Enforcement state` is `gap`. Skip rows already `enforced ✓` and rows marked `accepted gap` or `out of scope`.
-3. **Mirror each chosen row into visible task tracking** using `TaskCreate` — one task per characteristic, titled with the AF ID and the fitness function (`AF4 — wire axe-core in tests/e2e/a11y.spec.ts`). Description carries the threshold. **Name the model in use.** Before flipping the first task to `in_progress`, send a one-line chat message stating which model is running this implementation pass (the top-level session model, e.g. `claude-opus-4-7`), and include that model name in each task's description so the surface visibly reflects the routing decision.
+3. **Mirror each chosen row into visible task tracking** using `TaskCreate` — one task per characteristic, titled with the AF ID and the fitness function (`AF4 — wire axe-core in tests/e2e/a11y.spec.ts`). Description carries the threshold.
 4. **Update tasks live as work proceeds.** Mark each `in_progress` before starting, `completed` only when (a) the fitness function exists in config / CI / the alert system, (b) the threshold is encoded as a number, and (c) a deliberate failing run was observed at least once (proving it actually fails the build, not just runs). Do not batch.
 5. **Mirror status back into the spec.** Flip the row's `Enforcement state` from `gap` to `enforced ✓` and cite the config path inline. Update `Status:` in the header (`open` → `in progress` → `live`).
 6. **Default to warn-only first if violations exist today.** Land the function in non-blocking mode, get the existing violations to zero, then flip to fail. The task isn't `completed` until it actually fails on regression — explicitly track the flip date in the row's Notes.
@@ -194,4 +194,3 @@ Until then, stay in the loop.
 - **Don't double up with other skills.** Dependency-vulnerability cadence belongs to `dependency-audit`; layer-fit per-test belongs to `testing-pyramid`. This skill *names the characteristic* and points at where it's enforced — it doesn't re-implement those workflows.
 - **Australian English in the report** (colour, organised, behaviour, prioritise).
 - **Keep update messages terse.** The spec file is the durable artefact; chat updates are ≤120 words.
-- **Defer to smaller models for routine reads.** Reading a known config file or grepping for an existing rule is a Haiku-class task; reserve the top-level session for judgement on thresholds, ownership, and tradeoffs.

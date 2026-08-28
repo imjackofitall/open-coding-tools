@@ -156,60 +156,10 @@ Status: <Phase 1 in progress | Phase 1 complete | Phase 2 in progress | done>
 1. {highest impact-to-effort first}
 2. ...
 
-## Model routing
-
-| Step | Model      | Reason                                                  |
-| ---- | ---------- | ------------------------------------------------------- |
-| 1    | **haiku**  | {one line — pure mechanical work}                       |
-| 2    | **sonnet** | {one line — bounded judgement, well-specified}          |
-| 3    | **opus**   | {one line — design / risky / cross-cutting / synthesis} |
-
-If a sonnet/haiku step surfaces a non-trivial decision, escalate to the main session rather than guess.
-
 ## Out of scope
 
 {bullets — e.g. "monorepo root deps not audited this round"}
 ```
-
-### Model routing table (mandatory in every DA report)
-
-The defer-to-smaller-models rule is theoretical until you write it down per step. **Every DA report includes a Model
-routing table** (in the `## Model routing` section above) so the cheapest viable model is picked deliberately rather
-than by reflex.
-
-Template (shown in the output format above — fill in one row per action-list step):
-
-```markdown
-## Model routing
-
-| Step | Model      | Reason                                                  |
-| ---- | ---------- | ------------------------------------------------------- |
-| 1    | **haiku**  | {one line — pure mechanical work}                       |
-| 2    | **sonnet** | {one line — bounded judgement, well-specified}          |
-| 3    | **opus**   | {one line — design / risky / cross-cutting / synthesis} |
-
-If a sonnet/haiku step surfaces a non-trivial decision, escalate to the main session rather than guess.
-```
-
-**Rubric for picking the model:**
-
-- **haiku** — pure mechanical: run a command, grep, count lines, file moves, single-line edits, install a dep, confirm
-  a number, paste known content. No judgement required; if the agent has to choose between options, it's not haiku-class.
-- **sonnet** — bounded judgement: apply a pattern the report specifies, refactor following a recipe, fix lint errors with
-  clear rules, write boilerplate from a spec, classify hits into a fixed set of buckets. The agent makes small calls
-  inside well-defined rails.
-- **opus** (= top-level session) — design, architecture, risky migrations, cross-cutting changes, synthesising multiple
-  inputs, anything where getting it wrong wastes more than the model-cost saving. Don't delegate this.
-
-**Rules:**
-
-- **Each step in the prioritised action list gets a row.** No row → no execution. If a step has no row, the report is incomplete.
-- **Default towards cheaper.** If you're choosing between sonnet and opus and the work is well-specified by the report,
-  pick sonnet. Reserve opus for the parts where the report doesn't fully prescribe the answer.
-- **The escalation line is mandatory.** Sonnet/haiku subagents must know they can return without guessing — they will
-  guess otherwise.
-- **Re-evaluate after the design step.** Once the inventory/design step (usually opus) is done, the remaining steps are
-  often more mechanical than first thought; downgrade them if so.
 
 ## In-file question format (mandatory)
 
@@ -266,7 +216,7 @@ When the user signals the audit is ready to action (phrases like "apply these", 
 
 1. **Re-read the report end-to-end** — the user may have re-classified packages or re-ordered the action list.
 2. **Pick the active scope** by walking `## Prioritised action list` top-to-bottom. Each numbered item becomes one task. Stop at the boundary the user named, if any ("just do the zero-effort wins", "everything except the moment migration").
-3. **Mirror each action into visible task tracking** using `TaskCreate` — one task per action item, titled with the package or scope and the verb ("Replace `axios` with native `fetch` (4 sites)"). **Name the model on each task** per the `## Model routing` table (or the top-level session model if a row delegates to the main loop), and send a one-line chat message stating the active model before flipping the first task to `in_progress`.
+3. **Mirror each action into visible task tracking** using `TaskCreate` — one task per action item, titled with the package or scope and the verb ("Replace `axios` with native `fetch` (4 sites)").
 4. **Update tasks live as work proceeds.** Mark each `in_progress` before starting, `completed` when the action lands AND the relevant computational checks are green: `npm install` clean, lockfile delta sane, `npm audit` no new advisories, tests + typecheck + lint green. Do not batch completions.
 5. **Mirror status back into the report.** Flip the affected Phase 2 row to `done ✓` (or strike the row through). Tick off the action in the prioritised list. Update `Status:` in the header (`Phase 2 in progress` → `done`).
 6. **Force-fixes still need per-package approval.** Even mid-implementation, never bulk-apply `--force`. One task per force-fix, each one waiting on explicit go-ahead before flipping to `in_progress`.
@@ -280,10 +230,7 @@ Don't declare the audit complete until ALL of:
 1. Every Phase 1 advisory is either fixed, explicitly approved-and-applied, or carried over to Phase 2 with a documented reason.
 2. Every package in `dependencies` and `devDependencies` has a Phase 2 classification.
 3. Every question in `## Open questions` is answered.
-4. **The `## Model routing` table is populated** — one row per prioritised action-list step, model picked deliberately
-   from the rubric, escalation line present. See "Model routing table (mandatory in every DA report)". An unfilled
-   routing table means the report isn't ready to act on.
-5. The user has explicitly confirmed ("ship it", "approved", "go ahead").
+4. The user has explicitly confirmed ("ship it", "approved", "go ahead").
 
 Until then, stay in the loop.
 
@@ -300,14 +247,3 @@ Until then, stay in the loop.
 - **Never `cd` into app dirs in this monorepo.** Use `npm --workspace=<name> ...` from the root, or the named root scripts.
 - **Don't read `.env` files.** If a config check needs an env var, grep `process.env` usage instead.
 - **Stay terse between cycles.** The report file is the durable artefact; chat updates are ≤120 words.
-- **Defer to smaller models for routine reads.** When you need to read a known file,
-  grep for a specific symbol, or fetch a single doc page, do it directly with `Read` /
-  `Grep` / `WebFetch`. But anything that fans out — exploring an unfamiliar subsystem,
-  finding all call-sites of a symbol, summarising a long doc, comparing multiple files —
-  should be delegated to a subagent with `model: "haiku"` (or `"sonnet"` if the task
-  needs reasoning). Reserve the top-level Opus session for the synthesis work that
-  actually needs it: package selection, migration-cost assessment, writing the final
-  report. Don't pay Opus rates for grep.
-- **Every DA report has a Model routing table.** A report whose `## Model routing` section is unfilled isn't signed
-  off, even if every other section is complete. Use the template in "Model routing table (mandatory in every DA
-  report)" above. The sign-off gate enforces this.
